@@ -1,38 +1,63 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
+import { contentAPI, adminAPI } from "../services/api";
 
 export default function Notes() {
   const [notes, setNotes] = useState([]);
   const [search, setSearch] = useState("");
   const [department, setDepartment] = useState("All");
   const [year, setYear] = useState("All");
+  const [loading, setLoading] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
 
-  const STORAGE_KEY = "notesUploads";
+  useEffect(() => {
+    const role = sessionStorage.getItem("role");
+    setIsAdmin(role === "admin");
+    loadNotes();
+    
+    // Poll for updates every 5 seconds
+    const interval = setInterval(loadNotes, 5000);
+    return () => clearInterval(interval);
+  }, []);
 
-  const loadNotes = () => {
-    const stored = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
-    setNotes(stored.sort((a, b) => b.uploadedAtTs - a.uploadedAtTs));
+  const loadNotes = async () => {
+    try {
+      const params = {};
+      if (department !== "All") params.department = department;
+      if (year !== "All") params.year = year;
+      if (search) params.search = search;
+
+      const response = await contentAPI.getAllNotes(params);
+      if (response.data.success) {
+        setNotes(response.data.data);
+      }
+    } catch (error) {
+      console.error("Error loading notes:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
     loadNotes();
-    const handleStorageChange = (e) => {
-      if (e.key === STORAGE_KEY) loadNotes();
-    };
-    window.addEventListener("storage", handleStorageChange);
-    return () => window.removeEventListener("storage", handleStorageChange);
-  }, []);
+  }, [department, year, search]);
 
   const filteredNotes = notes.filter((note) => {
     const matchesSearch =
+      !search ||
       note.name.toLowerCase().includes(search.toLowerCase()) ||
       note.category.toLowerCase().includes(search.toLowerCase()) ||
-      note.uploader.toLowerCase().includes(search.toLowerCase());
-    const matchesDept =
-      department === "All" || note.department === department;
-    const matchesYear = year === "All" || note.year === year;
-    return matchesSearch && matchesDept && matchesYear;
+      note.uploaderName.toLowerCase().includes(search.toLowerCase());
+    return matchesSearch;
   });
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-xl">Loading notes...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#E0F7FA] via-[#B2EBF2] to-[#80DEEA] p-6 text-gray-800">
@@ -65,8 +90,8 @@ export default function Notes() {
         >
           <option value="All">All Departments</option>
           <option value="BA">BA</option>
-          <option value="BSc">BSc</option>
-          <option value="BCom">BCom</option>
+          <option value="BSC">BSC</option>
+          <option value="BCOM">BCOM</option>
           <option value="BCA">BCA</option>
         </select>
         <select
@@ -102,9 +127,9 @@ export default function Notes() {
           }}
           className="flex flex-wrap justify-center gap-8"
         >
-          {filteredNotes.map((note, i) => (
+          {filteredNotes.map((note) => (
             <motion.div
-              key={i}
+              key={note._id}
               variants={{
                 hidden: { opacity: 0, y: 30, scale: 0.9 },
                 visible: {
@@ -118,7 +143,7 @@ export default function Notes() {
               className="bg-white/80 backdrop-blur-lg shadow-lg rounded-2xl p-6 w-72 text-center hover:shadow-2xl border border-cyan-100 transition-all duration-300"
             >
               <h2 className="text-lg font-semibold text-cyan-700 mb-2 break-words">
-                {note.uploader || "Unknown"}
+                {note.uploaderName || "Unknown"}
               </h2>
               <p className="text-sm text-gray-700 mb-1">
                 <strong>Dept:</strong> {note.department || "N/A"} |{" "}
@@ -130,7 +155,7 @@ export default function Notes() {
 
               <div className="flex justify-center gap-3">
                 <a
-                  href={note.data}
+                  href={note.fileData}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="px-4 py-2 bg-cyan-500 text-white rounded-lg hover:bg-cyan-600 text-sm font-medium transition-all"
@@ -138,15 +163,15 @@ export default function Notes() {
                   Preview
                 </a>
                 <a
-                  href={note.data}
-                  download={note.name}
+                  href={note.fileData}
+                  download={note.fileName}
                   className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 text-sm font-medium transition-all"
                 >
                   Download
                 </a>
               </div>
               <p className="text-xs text-gray-400 mt-3">
-                Uploaded: {note.uploadedAt}
+                Uploaded: {new Date(note.createdAt).toLocaleString()}
               </p>
             </motion.div>
           ))}

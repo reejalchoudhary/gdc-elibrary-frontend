@@ -1,28 +1,50 @@
 import { motion } from "framer-motion";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { authAPI, setTokens } from "../../services/api";
 
 export default function AdminLogin({ onLogin }) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState(null); 
   const [isError, setIsError] = useState(false);
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleAdminLogin = (e) => {
+  const handleAdminLogin = async (e) => {
     e.preventDefault();
+    setLoading(true);
+    setMessage(null);
 
-    if (username === "admin" && password === "admin123") {
-      setMessage("✅ Admin login successful!");
-      setIsError(false);
+    try {
+      const response = await authAPI.loginAdmin(username, password);
+      
+      if (response.data.success) {
+        const { user, accessToken, refreshToken } = response.data.data;
+        
+        // Store tokens
+        setTokens(accessToken, refreshToken);
+        
+        setMessage("✅ Admin login successful!");
+        setIsError(false);
 
-      setTimeout(() => {
-        if (onLogin) onLogin();
-        navigate("/admin-dashboard");
-      }, 1500);
-    } else {
-      setMessage("❌ Invalid admin credentials");
+        if (onLogin) {
+          onLogin("admin", user);
+        }
+
+        setTimeout(() => {
+          navigate("/admin-dashboard");
+        }, 1500);
+      } else {
+        setMessage(response.data.message || "❌ Invalid admin credentials");
+        setIsError(true);
+      }
+    } catch (error) {
+      const errorMessage = error.response?.data?.message || "❌ Invalid admin credentials";
+      setMessage(errorMessage);
       setIsError(true);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -92,9 +114,10 @@ export default function AdminLogin({ onLogin }) {
             }}
             whileTap={{ scale: 0.95 }}
             type="submit"
-            className="w-full bg-gradient-to-r from-pink-500 via-rose-400 to-yellow-400 text-white py-2.5 rounded-lg font-semibold shadow-lg transition-all hover:shadow-yellow-400/50"
+            disabled={loading}
+            className="w-full bg-gradient-to-r from-pink-500 via-rose-400 to-yellow-400 text-white py-2.5 rounded-lg font-semibold shadow-lg transition-all hover:shadow-yellow-400/50 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Login
+            {loading ? "Logging in..." : "Login"}
           </motion.button>
         </form>
 

@@ -1,124 +1,77 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { Trash2, FileText, UploadCloud, Edit, Save, X, ArrowLeft } from "lucide-react";
+import { Trash2, FileText, ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { contentAPI, adminAPI } from "../../services/api";
 
 export default function ManagePYQs() {
   const navigate = useNavigate();
   const [pyqs, setPYQs] = useState([]);
-  const [file, setFile] = useState(null);
-  const [category, setCategory] = useState("");
-  const [name, setName] = useState("");
-  const [department, setDepartment] = useState("");
-  const [year, setYear] = useState("");
-  const [editIndex, setEditIndex] = useState(null);
-  const [status, setStatus] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [toast, setToast] = useState(null);
+
+  const showToast = (message, type = "success") => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 3000);
+  };
 
   useEffect(() => {
-    const storedPYQs = JSON.parse(localStorage.getItem("pyqsUploads") || "[]");
-    setPYQs(storedPYQs);
+    loadPYQs();
+    
+    // Poll for updates every 3 seconds
+    const interval = setInterval(loadPYQs, 3000);
+    return () => clearInterval(interval);
   }, []);
 
-  const savePYQs = (updated) => {
-    setPYQs(updated);
-    localStorage.setItem("pyqsUploads", JSON.stringify(updated));
-    window.dispatchEvent(new Event("storage"));
-  };
-
-  
-  const handleUpload = (e) => {
-    e.preventDefault();
-    setStatus("⏳ Uploading...");
-
-    if (!file || !category || !name || !department || !year) {
-      setStatus("⚠️ Please fill all fields and select a file!");
-      return;
-    }
-
-    const reader = new FileReader();
-
-    reader.onload = (event) => {
-      const newPYQ = {
-        name: file.name,
-        category,
-        uploader: name,
-        department,
-        year,
-        data: event.target.result,
-        uploadedAt: new Date().toLocaleString(),
-        uploadedAtTs: Date.now(),
-      };
-
-      try {
-        const existing = JSON.parse(localStorage.getItem("pyqsUploads") || "[]");
-        const updated = [...existing, newPYQ];
-
-        localStorage.setItem("pyqsUploads", JSON.stringify(updated));
-        window.dispatchEvent(new Event("storage"));
-        setPYQs(updated);
-
-        setStatus("✅ PYQ uploaded successfully!");
-      } catch (err) {
-        console.error(err);
-        setStatus("❌ Failed to save. File may be too large!");
+  const loadPYQs = async () => {
+    try {
+      const response = await contentAPI.getAllPYQs();
+      if (response.data.success) {
+        setPYQs(response.data.data);
       }
-
-      setFile(null);
-      setCategory("");
-      setName("");
-      setDepartment("");
-      setYear("");
-    };
-
-    reader.onerror = () => setStatus("❌ Failed to read file!");
-    reader.readAsDataURL(file);
+    } catch (error) {
+      console.error("Error loading PYQs:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleDelete = (index) => {
+  const handleDelete = async (pyqId) => {
     if (!window.confirm("🗑️ Delete this PYQ permanently?")) return;
-    const updated = pyqs.filter((_, i) => i !== index);
-    savePYQs(updated);
-    setStatus("🗑️ PYQ deleted.");
+
+    try {
+      const response = await adminAPI.deletePYQ(pyqId);
+      if (response.data.success) {
+        showToast("🗑️ PYQ deleted successfully!", "success");
+        loadPYQs();
+      } else {
+        showToast(response.data.message || "Delete failed", "error");
+      }
+    } catch (error) {
+      showToast(error.response?.data?.message || "Delete failed", "error");
+    }
   };
 
-  const handleEdit = (index) => {
-    setEditIndex(index);
-    const p = pyqs[index];
-    setCategory(p.category);
-    setName(p.uploader);
-    setDepartment(p.department);
-    setYear(p.year);
-  };
-
-  const handleSaveEdit = (index) => {
-    const updated = [...pyqs];
-    updated[index] = {
-      ...updated[index],
-      category,
-      uploader: name,
-      department,
-      year,
-    };
-    savePYQs(updated);
-    setEditIndex(null);
-    setCategory("");
-    setName("");
-    setDepartment("");
-    setYear("");
-    setStatus("✅ PYQ updated!");
-  };
-
-  const handleCancelEdit = () => {
-    setEditIndex(null);
-    setCategory("");
-    setName("");
-    setDepartment("");
-    setYear("");
-    setStatus("");
-  };
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-xl">Loading PYQs...</div>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-700 via-indigo-700 to-blue-700 text-white p-8 flex flex-col items-center">
+    <div className="min-h-screen bg-gradient-to-br from-indigo-700 via-purple-700 to-pink-700 text-white p-8 flex flex-col items-center">
+      {toast && (
+        <div
+          className={`fixed top-5 right-5 flex items-center gap-2 px-5 py-3 rounded-lg shadow-lg text-white backdrop-blur-md transition-all z-50 ${
+            toast.type === "error" ? "bg-red-500/90" : "bg-green-500/90"
+          }`}
+        >
+          <span className="font-medium">{toast.message}</span>
+        </div>
+      )}
+
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -132,166 +85,38 @@ export default function ManagePYQs() {
           <ArrowLeft size={20} /> Back to Dashboard
         </button>
 
-        <h1 className="text-3xl font-bold text-center mb-4 text-yellow-300">
+        <h1 className="text-3xl font-bold text-center mb-8 text-yellow-300">
           📄 Manage PYQs
         </h1>
 
-      
-        {status && (
-          <p className="text-center mb-6 bg-white/20 px-4 py-2 rounded-lg text-sm">
-            {status}
-          </p>
-        )}
-
-      
-        <form onSubmit={handleUpload} className="bg-white/10 p-6 rounded-xl mb-10">
-          <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-            <UploadCloud size={20} /> Upload New PYQ
-          </h2>
-
-          <div className="grid md:grid-cols-2 gap-4">
-            <input
-              type="text"
-              placeholder="Uploader Name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="p-2 rounded text-black"
-            />
-            <input
-              type="text"
-              placeholder="Category (e.g. BCA 1st Sem)"
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
-              className="p-2 rounded text-black"
-            />
-            <select
-              value={department}
-              onChange={(e) => setDepartment(e.target.value)}
-              className="p-2 rounded text-black"
-            >
-              <option value="">Select Department</option>
-              <option value="BA">BA</option>
-              <option value="BSc">BSc</option>
-              <option value="BCom">BCom</option>
-              <option value="BCA">BCA</option>
-            </select>
-            <select
-              value={year}
-              onChange={(e) => setYear(e.target.value)}
-              className="p-2 rounded text-black"
-            >
-              <option value="">Select Year</option>
-              <option value="1st Year">1st Year</option>
-              <option value="2nd Year">2nd Year</option>
-              <option value="3rd Year">3rd Year</option>
-            </select>
-            <input
-              type="file"
-              onChange={(e) => setFile(e.target.files[0])}
-              className="md:col-span-2 p-2 bg-white rounded text-black"
-            />
-          </div>
-
-          <button
-            type="submit"
-            className="mt-4 bg-yellow-400 hover:bg-yellow-500 text-purple-900 font-semibold px-6 py-2 rounded-lg transition"
-          >
-            🚀 Upload PYQ
-          </button>
-        </form>
-
-     
         {pyqs.length === 0 ? (
           <p className="text-center text-gray-300">No PYQs uploaded yet.</p>
         ) : (
           <div className="grid md:grid-cols-2 gap-6">
-            {pyqs.map((p, i) => (
+            {pyqs.map((pyq) => (
               <motion.div
-                key={i}
+                key={pyq._id}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.05 }}
                 className="bg-white bg-opacity-10 p-5 rounded-xl shadow-lg"
               >
-                {editIndex === i ? (
-                  <>
-                    <h2 className="text-xl font-semibold mb-2">✏️ Editing {p.name}</h2>
-                    <input
-                      type="text"
-                      placeholder="Uploader Name"
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      className="w-full p-2 mb-2 rounded text-black"
-                    />
-                    <input
-                      type="text"
-                      placeholder="Category"
-                      value={category}
-                      onChange={(e) => setCategory(e.target.value)}
-                      className="w-full p-2 mb-2 rounded text-black"
-                    />
-                    <select
-                      value={department}
-                      onChange={(e) => setDepartment(e.target.value)}
-                      className="w-full p-2 mb-2 rounded text-black"
-                    >
-                      <option value="BA">BA</option>
-                      <option value="BSc">BSc</option>
-                      <option value="BCom">BCom</option>
-                      <option value="BCA">BCA</option>
-                    </select>
-                    <select
-                      value={year}
-                      onChange={(e) => setYear(e.target.value)}
-                      className="w-full p-2 mb-2 rounded text-black"
-                    >
-                      <option value="1st Year">1st Year</option>
-                      <option value="2nd Year">2nd Year</option>
-                      <option value="3rd Year">3rd Year</option>
-                    </select>
-                    <div className="flex gap-3">
-                      <button
-                        onClick={() => handleSaveEdit(i)}
-                        className="bg-green-400 hover:bg-green-500 text-purple-900 font-semibold px-4 py-2 rounded-lg"
-                      >
-                        <Save size={16} className="inline mr-1" /> Save
-                      </button>
-                      <button
-                        onClick={handleCancelEdit}
-                        className="bg-gray-400 hover:bg-gray-500 text-white font-semibold px-4 py-2 rounded-lg"
-                      >
-                        <X size={16} className="inline mr-1" /> Cancel
-                      </button>
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    <div className="flex justify-between items-start">
-                      <h2 className="text-lg font-semibold flex items-center gap-2">
-                        <FileText size={20} /> {p.name}
-                      </h2>
-                      <div className="flex gap-3">
-                        <button
-                          onClick={() => handleEdit(i)}
-                          className="text-yellow-300 hover:text-yellow-400"
-                        >
-                          <Edit size={20} />
-                        </button>
-                        <button
-                          onClick={() => handleDelete(i)}
-                          className="text-red-400 hover:text-red-500"
-                        >
-                          <Trash2 size={20} />
-                        </button>
-                      </div>
-                    </div>
-                    <p className="text-gray-300 mt-2">
-                      {p.department} - {p.year}
-                    </p>
-                    <p className="text-sm text-gray-400">By {p.uploader}</p>
-                    <p className="text-xs text-gray-500 mt-1">{p.category}</p>
-                  </>
-                )}
+                <div className="flex justify-between items-start">
+                  <h2 className="text-lg font-semibold flex items-center gap-2">
+                    <FileText size={20} /> {pyq.name}
+                  </h2>
+                  <button
+                    onClick={() => handleDelete(pyq._id)}
+                    className="text-red-400 hover:text-red-500"
+                  >
+                    <Trash2 size={20} />
+                  </button>
+                </div>
+                <p className="text-gray-300 mt-2">{pyq.department} - {pyq.year}</p>
+                <p className="text-sm text-gray-400">By {pyq.uploaderName}</p>
+                <p className="text-xs text-gray-500 mt-1">{pyq.category}</p>
+                <p className="text-xs text-gray-500 mt-1">
+                  Uploaded: {new Date(pyq.createdAt).toLocaleString()}
+                </p>
               </motion.div>
             ))}
           </div>

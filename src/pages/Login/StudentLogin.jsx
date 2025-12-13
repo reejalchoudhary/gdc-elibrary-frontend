@@ -1,47 +1,47 @@
 import { motion } from "framer-motion";
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import { authAPI, setTokens } from "../../services/api";
 
 export default function StudentLogin({ onLogin }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
+    setLoading(true);
+    setMessage("");
 
-    const approvedStudents = JSON.parse(localStorage.getItem("approved_students") || "[]");
-    const pendingRequests = JSON.parse(localStorage.getItem("student_requests") || "[]");
-
-    const approvedUser = approvedStudents.find(
-      (s) => s.email === email && s.password === password
-    );
-
-    const pendingUser = pendingRequests.find(
-      (s) => s.email === email && s.password === password
-    );
-
-    if (approvedUser) {
-    
-      localStorage.setItem(
-        "loggedInStudent",
-        JSON.stringify({
-          name: approvedUser.name,
-          email: approvedUser.email,
-          department: approvedUser.department,
-          year: approvedUser.year,
-          rollNo: approvedUser.rollNo || "N/A",
-        })
-      );
-
-      setMessage(`✅ Welcome ${approvedUser.name}! Redirecting...`);
-      if (onLogin) onLogin();
-      setTimeout(() => navigate("/home"), 1500);
-    } else if (pendingUser) {
-      setMessage("⏳ Your registration is pending admin approval. Please wait!");
-    } else {
-      setMessage("❌ Invalid email or password! Please check your credentials.");
+    try {
+      const response = await authAPI.loginStudent(email, password);
+      
+      if (response.data.success) {
+        const { user, accessToken, refreshToken } = response.data.data;
+        
+        // Store tokens
+        setTokens(accessToken, refreshToken);
+        
+        // Store user data
+        sessionStorage.setItem("loggedInStudent", JSON.stringify(user));
+        
+        setMessage(`✅ Welcome ${user.name}! Redirecting...`);
+        
+        if (onLogin) {
+          onLogin("student", user);
+        }
+        
+        setTimeout(() => navigate("/home"), 1500);
+      } else {
+        setMessage(response.data.message || "❌ Login failed. Please try again.");
+      }
+    } catch (error) {
+      const errorMessage = error.response?.data?.message || "❌ An error occurred. Please try again.";
+      setMessage(errorMessage);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -116,9 +116,10 @@ export default function StudentLogin({ onLogin }) {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.97 }}
             type="submit"
-            className="w-full bg-gradient-to-r from-purple-500 to-indigo-500 text-white py-2 rounded-lg font-semibold shadow-lg hover:from-purple-600 hover:to-indigo-600 transition-all"
+            disabled={loading}
+            className="w-full bg-gradient-to-r from-purple-500 to-indigo-500 text-white py-2 rounded-lg font-semibold shadow-lg hover:from-purple-600 hover:to-indigo-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Login
+            {loading ? "Logging in..." : "Login"}
           </motion.button>
         </form>
 

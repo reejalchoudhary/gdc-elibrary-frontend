@@ -27,26 +27,71 @@ import ManageBooks from "./pages/Admin/ManageBooks";
 import ManagePYQs from "./pages/Admin/ManagePYQs";
 import ManageDiscussions from "./pages/Admin/ManageDiscussions";
 import ManageUsers from "./pages/Admin/ManageUsers";
+import { authAPI, clearTokens } from "./services/api";
 
 export default function App() {
-  const [isLoggedIn, setIsLoggedIn] = useState(
-    sessionStorage.getItem("loggedIn") === "true"
-  );
-  const [role, setRole] = useState(sessionStorage.getItem("role") || "");
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [role, setRole] = useState("");
+  const [loading, setLoading] = useState(true);
 
-  const handleLogin = (userRole) => {
+  // Check authentication on mount
+  useEffect(() => {
+    const checkAuth = async () => {
+      const token = localStorage.getItem("accessToken") || sessionStorage.getItem("accessToken");
+      if (token) {
+        try {
+          const response = await authAPI.getCurrentUser();
+          if (response.data.success) {
+            const user = response.data.data;
+            setIsLoggedIn(true);
+            setRole(user.role);
+            sessionStorage.setItem("loggedIn", "true");
+            sessionStorage.setItem("role", user.role);
+            if (user.role === "student") {
+              sessionStorage.setItem("loggedInStudent", JSON.stringify(user));
+            }
+          }
+        } catch (error) {
+          // Token invalid, clear storage
+          clearTokens();
+          setIsLoggedIn(false);
+          setRole("");
+        }
+      }
+      setLoading(false);
+    };
+    checkAuth();
+  }, []);
+
+  const handleLogin = (userRole, userData) => {
     setIsLoggedIn(true);
     setRole(userRole);
     sessionStorage.setItem("loggedIn", "true");
     sessionStorage.setItem("role", userRole);
+    if (userData && userRole === "student") {
+      sessionStorage.setItem("loggedInStudent", JSON.stringify(userData));
+    }
   };
 
-  const handleLogout = () => {
-    setIsLoggedIn(false);
-    setRole("");
-    sessionStorage.removeItem("loggedIn");
-    sessionStorage.removeItem("role");
+  const handleLogout = async () => {
+    try {
+      await authAPI.logout();
+    } catch (error) {
+      console.error("Logout error:", error);
+    } finally {
+      clearTokens();
+      setIsLoggedIn(false);
+      setRole("");
+    }
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-xl">Loading...</div>
+      </div>
+    );
+  }
 
   return (
     <Router>
@@ -66,11 +111,11 @@ export default function App() {
             <Route path="/login-selector" element={<LoginSelector />} />
             <Route
               path="/student-login"
-              element={<StudentLogin onLogin={() => handleLogin("student")} />}
+              element={<StudentLogin onLogin={(role, userData) => handleLogin(role, userData)} />}
             />
             <Route
               path="/admin-login"
-              element={<AdminLogin onLogin={() => handleLogin("admin")} />}
+              element={<AdminLogin onLogin={(role, userData) => handleLogin(role, userData)} />}
             />
             <Route path="/profile" element={<Profile />} />
 

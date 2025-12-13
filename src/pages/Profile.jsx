@@ -1,40 +1,55 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { UserCircle } from "lucide-react";
+import { authAPI } from "../services/api";
 
 export default function Profile() {
   const [student, setStudent] = useState(null);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
-    
-    const keys = [
-      "loggedInStudent",
-      "student",
-      "user",
-      "currentUser",
-      "studentData",
-    ];
+    loadProfile();
+  }, []);
 
-    let found = null;
-    for (const key of keys) {
-      const value = localStorage.getItem(key);
-      if (value) {
-        try {
-          found = JSON.parse(value);
-          break;
-        } catch (err) {
-          console.error("Error parsing stored student data:", err);
+  const loadProfile = async () => {
+    try {
+      const response = await authAPI.getCurrentUser();
+      if (response.data.success) {
+        setStudent(response.data.data);
+      } else {
+        // Try to get from sessionStorage as fallback
+        const stored = sessionStorage.getItem("loggedInStudent");
+        if (stored) {
+          try {
+            setStudent(JSON.parse(stored));
+          } catch (e) {
+            console.error("Error parsing stored data:", e);
+          }
         }
       }
+    } catch (error) {
+      // Fallback to sessionStorage
+      const stored = sessionStorage.getItem("loggedInStudent");
+      if (stored) {
+        try {
+          setStudent(JSON.parse(stored));
+        } catch (e) {
+          console.error("Error parsing stored data:", e);
+        }
+      }
+    } finally {
+      setLoading(false);
     }
+  };
 
-    if (!found) {
-      console.warn("⚠️ No student data found in localStorage");
-    } else {
-      setStudent(found);
-    }
-  }, []);
+  if (loading) {
+    return (
+      <div className="min-h-screen flex flex-col justify-center items-center text-white bg-gradient-to-br from-purple-600 via-indigo-600 to-blue-500">
+        <p className="text-lg">Loading profile...</p>
+      </div>
+    );
+  }
 
   if (!student) {
     return (
@@ -61,7 +76,8 @@ export default function Profile() {
           <p><span className="font-semibold text-yellow-300">Email:</span> {student.email || "Not Provided"}</p>
           <p><span className="font-semibold text-yellow-300">Department:</span> {student.department || "Not Provided"}</p>
           <p><span className="font-semibold text-yellow-300">Year:</span> {student.year || "Not Provided"}</p>
-          <p><span className="font-semibold text-yellow-300">Roll No:</span> {student.rollNo || "Not Provided"}</p>
+          <p><span className="font-semibold text-yellow-300">Roll No:</span> {student.rollno || student.rollNo || "Not Provided"}</p>
+          <p><span className="font-semibold text-yellow-300">Status:</span> {student.status || "Not Provided"}</p>
         </div>
 
         <button

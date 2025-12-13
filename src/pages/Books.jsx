@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Eye, Download, Trash2 } from "lucide-react";
-import { motion } from "framer-motion"; 
+import { motion } from "framer-motion";
+import { contentAPI, adminAPI } from "../services/api";
 
 export default function Books() {
   const [books, setBooks] = useState([]);
@@ -9,45 +10,65 @@ export default function Books() {
   const [yearFilter, setYearFilter] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("");
   const [toast, setToast] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   const showToast = (message, type = "success") => {
     setToast({ message, type });
     setTimeout(() => setToast(null), 3000);
   };
 
-
   useEffect(() => {
-    const stored = JSON.parse(localStorage.getItem("booksUploads") || "[]");
-    stored.sort((a, b) => (b.uploadedAtTs || 0) - (a.uploadedAtTs || 0));
-    setBooks(stored);
-
-    const handleStorageChange = (e) => {
-      if (e.key === "booksUploads") {
-        const updatedBooks = JSON.parse(localStorage.getItem("booksUploads") || "[]");
-        setBooks(updatedBooks);
-      }
-    };
-
-    window.addEventListener("storage", handleStorageChange);
-    return () => window.removeEventListener("storage", handleStorageChange);
+    const role = sessionStorage.getItem("role");
+    setIsAdmin(role === "admin");
+    loadBooks();
+    
+    // Poll for updates every 5 seconds
+    const interval = setInterval(loadBooks, 5000);
+    return () => clearInterval(interval);
   }, []);
 
-  const saveAndSet = (arr) => {
-    localStorage.setItem("booksUploads", JSON.stringify(arr));
-    setBooks(arr);
+  const loadBooks = async () => {
+    try {
+      const params = {};
+      if (departmentFilter) params.department = departmentFilter;
+      if (yearFilter) params.year = yearFilter;
+      if (categoryFilter) params.category = categoryFilter;
+      if (query) params.search = query;
+
+      const response = await contentAPI.getAllBooks(params);
+      if (response.data.success) {
+        setBooks(response.data.data);
+      }
+    } catch (error) {
+      console.error("Error loading books:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleDelete = (index) => {
-    if (sessionStorage.getItem("role") !== "admin") {
+  useEffect(() => {
+    loadBooks();
+  }, [departmentFilter, yearFilter, categoryFilter, query]);
+
+  const handleDelete = async (bookId) => {
+    if (!isAdmin) {
       showToast("Only admin can delete uploads.", "error");
       return;
     }
     if (!window.confirm("Delete this item?")) return;
-    const updated = [...books];
-    updated.splice(index, 1);
-    saveAndSet(updated);
-    window.dispatchEvent(new Event("storage"));
-    showToast("🗑️ Book deleted successfully!", "error");
+
+    try {
+      const response = await adminAPI.deleteBook(bookId);
+      if (response.data.success) {
+        showToast("🗑️ Book deleted successfully!", "success");
+        loadBooks();
+      } else {
+        showToast(response.data.message || "Delete failed", "error");
+      }
+    } catch (error) {
+      showToast(error.response?.data?.message || "Delete failed", "error");
+    }
   };
 
   const filtered = books.filter((b) => {
@@ -63,34 +84,13 @@ export default function Books() {
   const years = Array.from(new Set(books.map((b) => b.year).filter(Boolean)));
   const categories = Array.from(new Set(books.map((b) => b.category).filter(Boolean)));
 
-  
-  const handleUpload = (e) => {
-    e.preventDefault();
-    const file = e.target.files[0];
-    const reader = new FileReader();
-
-    if (!file) return;
-
-    reader.onload = () => {
-      const newBook = {
-        name: file.name,
-        category,
-        uploader: "Admin",  
-        department,
-        year,
-        data: reader.result,
-        uploadedAt: new Date().toLocaleString(),
-        uploadedAtTs: Date.now(),
-      };
-      
-      const updated = [...books, newBook];
-      saveAndSet(updated);
-      window.dispatchEvent(new Event("storage"));
-      showToast("✅ Book uploaded successfully!");
-    };
-
-    reader.readAsDataURL(file);
-  };
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-xl">Loading books...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-gradient-to-b from-[#E3F2FD] via-[#BBDEFB] to-[#90CAF9] text-gray-800">
@@ -117,11 +117,6 @@ export default function Books() {
             toast.type === "error" ? "bg-red-500/90" : "bg-green-500/90"
           }`}
         >
-          {toast.type === "error" ? (
-            <XCircle className="w-5 h-5" />
-          ) : (
-            <CheckCircle className="w-5 h-5" />
-          )}
           <span className="font-medium">{toast.message}</span>
         </div>
       )}
@@ -194,13 +189,12 @@ export default function Books() {
             </motion.p>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filtered.map((book, idx) => (
+              {filtered.map((book) => (
                 <motion.div
-                  key={idx}
+                  key={book._id}
                   initial={{ opacity: 0, y: 30, scale: 0.95 }}
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   transition={{
-                    delay: idx * 0.05,
                     duration: 0.4,
                     type: "spring",
                     stiffness: 120,
@@ -212,10 +206,11 @@ export default function Books() {
                   <p className="text-sm text-gray-700">📖 {book.category}</p>
                   <p className="text-sm text-gray-600">🏛 {book.department || "—"}</p>
                   <p className="text-sm text-gray-600 mb-3">🎓 {book.year || "—"}</p>
+                  <p className="text-xs text-gray-500 mb-3">By: {book.uploaderName}</p>
 
                   <div className="flex gap-2">
                     <a
-                      href={book.data}
+                      href={book.fileData}
                       target="_blank"
                       rel="noreferrer"
                       className="flex-1 bg-cyan-600 hover:bg-cyan-700 text-white py-2 rounded-lg text-center transition-colors"
@@ -223,18 +218,18 @@ export default function Books() {
                       <Eye className="inline-block mr-1 w-4 h-4" /> Preview
                     </a>
                     <a
-                      href={book.data}
-                      download={book.name}
+                      href={book.fileData}
+                      download={book.fileName}
                       className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg text-center transition-colors"
                     >
                       <Download className="inline-block mr-1 w-4 h-4" /> Download
                     </a>
                   </div>
 
-                  {sessionStorage.getItem("role") === "admin" && (
+                  {isAdmin && (
                     <div className="mt-3 text-right">
                       <button
-                        onClick={() => handleDelete(books.indexOf(book))}
+                        onClick={() => handleDelete(book._id)}
                         className="text-red-600 hover:underline flex items-center gap-1 text-sm"
                       >
                         <Trash2 className="w-4 h-4" /> Delete

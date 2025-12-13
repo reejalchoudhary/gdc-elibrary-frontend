@@ -1,22 +1,11 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useNavigate } from "react-router-dom";
+import { contentAPI } from "../services/api";
 
 import up1 from "../assets/upload1.jpg";
 import up2 from "../assets/upload2.jpg";
 import up3 from "../assets/upload3.jpg";
-
-const STORAGE_MAP = {
-  book: "booksUploads",
-  note: "notesUploads",
-  pyq: "pyqsUploads",
-};
-
-function nowString() {
-  return new Date().toLocaleString();
-}
-function nowTs() {
-  return Date.now();
-}
 
 function Toast({ message, type = "success", onClose }) {
   return (
@@ -75,10 +64,18 @@ export default function Upload() {
     return () => clearInterval(interval);
   }, [images.length]);
 
+  const navigate = useNavigate();
+
   useEffect(() => {
     const loggedIn = JSON.parse(sessionStorage.getItem("loggedInStudent") || "null");
     if (loggedIn?.name) setUploader(loggedIn.name);
-  }, []);
+    
+    // Check if user is logged in
+    const token = localStorage.getItem("accessToken") || sessionStorage.getItem("accessToken");
+    if (!token) {
+      navigate("/login-selector");
+    }
+  }, [navigate]);
 
   const pushToast = (message, variant = "success", ttl = 3000) => {
     const id = Math.random().toString(36).slice(2);
@@ -104,36 +101,38 @@ export default function Upload() {
     if (!year) return pushToast("Select year.", "error");
     if (!file) return pushToast("Choose a file.", "error");
 
-    pushToast("Uploading...", "info", 1500);
+    pushToast("Uploading...", "info", 5000);
 
     try {
-      const dataUrl = await readFileAsDataURL(file);
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("name", name.trim());
+      formData.append("category", category.trim());
+      formData.append("department", department);
+      formData.append("year", year);
 
-      const payload = {
-        name: name.trim(),
-        category: category.trim(),
-        department,
-        year,
-        uploader: uploader || "Anonymous",
-        data: dataUrl,
-        uploadedAt: nowString(),
-        uploadedAtTs: nowTs(),
-      };
+      let response;
+      if (type === "book") {
+        response = await contentAPI.uploadBook(formData);
+      } else if (type === "note") {
+        response = await contentAPI.uploadNote(formData);
+      } else {
+        response = await contentAPI.uploadPYQ(formData);
+      }
 
-      const key = STORAGE_MAP[type];
-      const existing = JSON.parse(localStorage.getItem(key) || "[]");
-      existing.unshift(payload);
-      localStorage.setItem(key, JSON.stringify(existing));
-
-      pushToast("Upload successful 🎉", "success");
-
-      setName("");
-      setCategory("");
-      setDepartment("");
-      setYear("");
-      setFile(null);
-    } catch {
-      pushToast("Upload failed!", "error");
+      if (response.data.success) {
+        pushToast("Upload successful 🎉", "success");
+        setName("");
+        setCategory("");
+        setDepartment("");
+        setYear("");
+        setFile(null);
+      } else {
+        pushToast(response.data.message || "Upload failed!", "error");
+      }
+    } catch (error) {
+      const errorMessage = error.response?.data?.message || "Upload failed! Please try again.";
+      pushToast(errorMessage, "error");
     }
   }
 
@@ -181,7 +180,7 @@ export default function Upload() {
             ⬆️ Upload Material
           </h1>
           <p className="text-center text-gray-700 mb-6">
-            Select type and upload files stored in LocalStorage.
+            Select type and upload files to the server.
           </p>
 
           <div className="flex justify-center gap-4 mb-6">

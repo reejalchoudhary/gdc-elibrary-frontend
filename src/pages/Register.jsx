@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
+import { authAPI } from "../services/api";
 
 export default function Register() {
   const [name, setName] = useState("");
@@ -11,29 +12,39 @@ export default function Register() {
   const [mobile, setMobile] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleRegister = (e) => {
+  const handleRegister = async (e) => {
     e.preventDefault();
+    setLoading(true);
+    setMessage("");
 
-    const students = JSON.parse(localStorage.getItem("student_requests") || "[]");
-    const approvedStudents = JSON.parse(localStorage.getItem("approved_students") || "[]");
+    try {
+      const response = await authAPI.register({
+        name,
+        email,
+        rollno,
+        department,
+        year,
+        mobile,
+        password,
+      });
 
-    const exists = [...students, ...approvedStudents].some((s) => s.email === email);
-    if (exists) {
-      setMessage("❌ This email is already registered!");
-      return;
+      if (response.data.success) {
+        setMessage("✅ Registration submitted! Please wait for admin approval.");
+        setTimeout(() => {
+          navigate("/student-login");
+        }, 2000);
+      } else {
+        setMessage(response.data.message || "❌ Registration failed. Please try again.");
+      }
+    } catch (error) {
+      const errorMessage = error.response?.data?.message || "❌ An error occurred. Please try again.";
+      setMessage(errorMessage);
+    } finally {
+      setLoading(false);
     }
-
-    const newStudent = { name, email, rollno, department, year, mobile, password };
-    students.push(newStudent);
-    localStorage.setItem("student_requests", JSON.stringify(students));
-
-    setMessage("✅ Registration submitted! Please wait for admin approval.");
-
-    setTimeout(() => {
-      navigate("/student-login");
-    }, 2000);
   };
 
   const getYearOptions = () => {
@@ -208,9 +219,10 @@ export default function Register() {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.98 }}
             type="submit"
-            className="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white py-2 rounded-lg font-semibold shadow-lg hover:shadow-pink-500/40 transition-all"
+            disabled={loading}
+            className="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white py-2 rounded-lg font-semibold shadow-lg hover:shadow-pink-500/40 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Register
+            {loading ? "Registering..." : "Register"}
           </motion.button>
         </form>
 
