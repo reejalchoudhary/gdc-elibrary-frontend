@@ -3,10 +3,11 @@ import axios from 'axios';
 // API Base URL - will be set from environment variable
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://gdc-elibrary-backend-z0cz.onrender.com/api';
 
-// Log API URL for debugging (remove in production)
+// Log API URL for debugging
 if (import.meta.env.DEV) {
   console.log('🔗 API Base URL:', API_BASE_URL);
   console.log('🌍 Environment:', import.meta.env.MODE);
+  console.log('🔧 VITE_API_URL:', import.meta.env.VITE_API_URL || 'Not set (using Render default)');
 }
 
 // Create axios instance
@@ -15,6 +16,8 @@ const api = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+  withCredentials: true, // Important for CORS with credentials
+  timeout: 30000, // 30 second timeout
 });
 
 // Token management
@@ -76,6 +79,8 @@ api.interceptors.response.use(
         // Try to refresh token
         const response = await axios.post(`${API_BASE_URL}/auth/refresh`, {
           refreshToken,
+        }, {
+          withCredentials: true,
         });
 
         const { accessToken, refreshToken: newRefreshToken } = response.data.data;
@@ -86,10 +91,32 @@ api.interceptors.response.use(
         return api(originalRequest);
       } catch (refreshError) {
         // Refresh failed, clear tokens and redirect
+        console.error('Token refresh failed:', refreshError);
         clearTokens();
-        window.location.href = '/login-selector';
+        // Only redirect if we're not already on login page
+        if (!window.location.pathname.includes('login')) {
+          window.location.href = '/login-selector';
+        }
         return Promise.reject(refreshError);
       }
+    }
+
+    // Log error for debugging in production
+    if (error.response) {
+      console.error('API Error:', {
+        status: error.response.status,
+        statusText: error.response.statusText,
+        url: error.config?.url,
+        message: error.response.data?.message || error.message
+      });
+    } else if (error.request) {
+      console.error('Network Error:', {
+        message: 'No response received from server',
+        url: error.config?.url,
+        baseURL: API_BASE_URL
+      });
+    } else {
+      console.error('Request Error:', error.message);
     }
 
     return Promise.reject(error);
@@ -139,6 +166,8 @@ export const contentAPI = {
         'Content-Type': 'multipart/form-data',
         Authorization: `Bearer ${token}`,
       },
+      withCredentials: true,
+      timeout: 60000, // 60 seconds for file uploads
     });
   },
 
@@ -152,6 +181,8 @@ export const contentAPI = {
         'Content-Type': 'multipart/form-data',
         Authorization: `Bearer ${token}`,
       },
+      withCredentials: true,
+      timeout: 60000, // 60 seconds for file uploads
     });
   },
 
@@ -165,6 +196,8 @@ export const contentAPI = {
         'Content-Type': 'multipart/form-data',
         Authorization: `Bearer ${token}`,
       },
+      withCredentials: true,
+      timeout: 60000, // 60 seconds for file uploads
     });
   },
 };

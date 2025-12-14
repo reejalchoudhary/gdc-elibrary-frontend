@@ -38,7 +38,22 @@ export default function StudentLogin({ onLogin }) {
         setMessage(response.data.message || "❌ Login failed. Please try again.");
       }
     } catch (error) {
-      const errorMessage = error.response?.data?.message || "❌ An error occurred. Please try again.";
+      console.error('Login error:', error);
+      
+      let errorMessage = "❌ An error occurred. Please try again.";
+      
+      if (error.response) {
+        // Server responded with error
+        errorMessage = error.response.data?.message || `❌ ${error.response.status}: ${error.response.statusText}`;
+      } else if (error.request) {
+        // Request made but no response received
+        errorMessage = "❌ Cannot connect to server. Please check your internet connection or try again later.";
+        console.error('Network error - no response:', error.request);
+      } else {
+        // Something else happened
+        errorMessage = error.message || errorMessage;
+      }
+      
       setMessage(errorMessage);
     } finally {
       setLoading(false);

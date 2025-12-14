@@ -40,7 +40,22 @@ export default function AdminLogin({ onLogin }) {
         setIsError(true);
       }
     } catch (error) {
-      const errorMessage = error.response?.data?.message || "❌ Invalid admin credentials";
+      console.error('Admin login error:', error);
+      
+      let errorMessage = "❌ Invalid admin credentials";
+      
+      if (error.response) {
+        // Server responded with error
+        errorMessage = error.response.data?.message || `❌ ${error.response.status}: ${error.response.statusText}`;
+      } else if (error.request) {
+        // Request made but no response received
+        errorMessage = "❌ Cannot connect to server. Please check your internet connection or try again later.";
+        console.error('Network error - no response:', error.request);
+      } else {
+        // Something else happened
+        errorMessage = error.message || errorMessage;
+      }
+      
       setMessage(errorMessage);
       setIsError(true);
     } finally {

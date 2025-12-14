@@ -37,6 +37,19 @@ export default function App() {
   // Check authentication on mount
   useEffect(() => {
     const checkAuth = async () => {
+      // First check if we have a session flag (user just logged in)
+      const sessionLoggedIn = sessionStorage.getItem("loggedIn") === "true";
+      const sessionRole = sessionStorage.getItem("role");
+      
+      if (sessionLoggedIn && sessionRole) {
+        // User just logged in, use session data
+        setIsLoggedIn(true);
+        setRole(sessionRole);
+        setLoading(false);
+        return;
+      }
+
+      // Otherwise, verify token with backend
       const token = localStorage.getItem("accessToken") || sessionStorage.getItem("accessToken");
       if (token) {
         try {
@@ -50,13 +63,29 @@ export default function App() {
             if (user.role === "student") {
               sessionStorage.setItem("loggedInStudent", JSON.stringify(user));
             }
+          } else {
+            // Invalid response, clear storage
+            clearTokens();
+            setIsLoggedIn(false);
+            setRole("");
           }
         } catch (error) {
-          // Token invalid, clear storage
-          clearTokens();
-          setIsLoggedIn(false);
-          setRole("");
+          // Token invalid or network error, clear storage only if it's an auth error
+          console.error("Auth check failed:", error);
+          if (error.response?.status === 401 || error.response?.status === 403) {
+            clearTokens();
+            setIsLoggedIn(false);
+            setRole("");
+          } else {
+            // Network error - keep current state if we have a token
+            // Don't clear tokens on network errors
+            console.warn("Network error during auth check, keeping current state");
+          }
         }
+      } else {
+        // No token, ensure we're logged out
+        setIsLoggedIn(false);
+        setRole("");
       }
       setLoading(false);
     };
@@ -151,15 +180,20 @@ function RedirectLogic({ isLoggedIn, role }) {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (isLoggedIn) {
-      if (role === "admin") {
-        navigate("/admin-dashboard");
+    // Small delay to ensure state is set
+    const timer = setTimeout(() => {
+      if (isLoggedIn) {
+        if (role === "admin") {
+          navigate("/admin-dashboard", { replace: true });
+        } else {
+          navigate("/home", { replace: true });
+        }
       } else {
-        navigate("/home");
+        navigate("/login-selector", { replace: true });
       }
-    } else {
-      navigate("/login-selector");
-    }
+    }, 100);
+
+    return () => clearTimeout(timer);
   }, [isLoggedIn, role, navigate]);
 
   return null;
