@@ -38,6 +38,38 @@ export default function Notes() {
     }
   };
 
+  const handlePreview = (fileData, mimeType) => {
+    const newWindow = window.open();
+    if (!newWindow) {
+      alert("Please allow popups to preview files");
+      return;
+    }
+    
+    newWindow.document.write(`
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>Preview</title>
+          <style>
+            body { margin: 0; padding: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; background: #f0f0f0; }
+            img { max-width: 100%; max-height: 100vh; }
+            embed, iframe { width: 100%; height: 100vh; border: none; }
+            object { width: 100%; height: 100vh; }
+          </style>
+        </head>
+        <body>
+          ${mimeType?.startsWith('image/') 
+            ? `<img src="${fileData}" alt="Preview" />`
+            : mimeType === 'application/pdf'
+            ? `<embed src="${fileData}" type="application/pdf" />`
+            : `<iframe src="${fileData}"></iframe>`
+          }
+        </body>
+      </html>
+    `);
+    newWindow.document.close();
+  };
+
   useEffect(() => {
     loadNotes();
   }, [department, year, search]);
@@ -154,14 +186,12 @@ export default function Notes() {
               </p>
 
               <div className="flex justify-center gap-3">
-                <a
-                  href={note.fileData}
-                  target="_blank"
-                  rel="noopener noreferrer"
+                <button
+                  onClick={() => handlePreview(note.fileData, note.mimeType)}
                   className="px-4 py-2 bg-cyan-500 text-white rounded-lg hover:bg-cyan-600 text-sm font-medium transition-all"
                 >
                   Preview
-                </a>
+                </button>
                 <a
                   href={note.fileData}
                   download={note.fileName}

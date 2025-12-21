@@ -108,7 +108,8 @@ export default function Upload() {
       formData.append("file", file);
       formData.append("name", name.trim());
       formData.append("category", category.trim());
-      formData.append("department", department);
+      // Ensure department is uppercase to match backend enum (BSC, BCOM)
+      formData.append("department", department.toUpperCase());
       formData.append("year", year);
 
       let response;
@@ -220,8 +221,8 @@ export default function Upload() {
             >
               <option value="">Select Department</option>
               <option value="BA">BA</option>
-              <option value="BSc">BSc</option>
-              <option value="BCom">BCom</option>
+              <option value="BSC">BSC</option>
+              <option value="BCOM">BCOM</option>
               <option value="BCA">BCA</option>
             </select>
 
