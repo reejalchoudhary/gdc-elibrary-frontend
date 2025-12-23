@@ -18,7 +18,6 @@ export default function ManageBooks() {
   useEffect(() => {
     loadBooks();
     
-    // Poll for updates every 3 seconds
     const interval = setInterval(loadBooks, 3000);
     return () => clearInterval(interval);
   }, []);

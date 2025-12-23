@@ -23,7 +23,6 @@ export default function Books() {
     setIsAdmin(role === "admin");
     loadBooks();
     
-    // Poll for updates every 5 seconds
     const interval = setInterval(loadBooks, 5000);
     return () => clearInterval(interval);
   }, []);
@@ -52,14 +51,12 @@ export default function Books() {
   }, [departmentFilter, yearFilter, categoryFilter, query]);
 
   const handlePreview = (fileData, mimeType) => {
-    // Create a new window with proper content type
     const newWindow = window.open();
     if (!newWindow) {
       showToast("Please allow popups to preview files", "error");
       return;
     }
     
-    // Write the file content to the new window
     newWindow.document.write(`
       <!DOCTYPE html>
       <html>

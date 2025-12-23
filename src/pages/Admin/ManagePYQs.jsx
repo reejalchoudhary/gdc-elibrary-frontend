@@ -18,7 +18,6 @@ export default function ManagePYQs() {
   useEffect(() => {
     loadPYQs();
     
-    // Poll for updates every 3 seconds
     const interval = setInterval(loadPYQs, 3000);
     return () => clearInterval(interval);
   }, []);

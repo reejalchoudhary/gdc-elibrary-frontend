@@ -16,7 +16,6 @@ export default function ManageDiscussions() {
   useEffect(() => {
     loadDiscussions();
     
-    // Poll for updates every 3 seconds
     const interval = setInterval(loadDiscussions, 3000);
     return () => clearInterval(interval);
   }, []);

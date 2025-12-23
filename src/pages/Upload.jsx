@@ -70,7 +70,6 @@ export default function Upload() {
     const loggedIn = JSON.parse(sessionStorage.getItem("loggedInStudent") || "null");
     if (loggedIn?.name) setUploader(loggedIn.name);
     
-    // Check if user is logged in
     const token = localStorage.getItem("accessToken") || sessionStorage.getItem("accessToken");
     if (!token) {
       navigate("/login-selector");
@@ -108,7 +107,6 @@ export default function Upload() {
       formData.append("file", file);
       formData.append("name", name.trim());
       formData.append("category", category.trim());
-      // Ensure department is uppercase to match backend enum (BSC, BCOM)
       formData.append("department", department.toUpperCase());
       formData.append("year", year);
 

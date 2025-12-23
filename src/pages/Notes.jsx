@@ -15,7 +15,6 @@ export default function Notes() {
     setIsAdmin(role === "admin");
     loadNotes();
     
-    // Poll for updates every 5 seconds
     const interval = setInterval(loadNotes, 5000);
     return () => clearInterval(interval);
   }, []);

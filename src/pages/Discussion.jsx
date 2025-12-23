@@ -14,7 +14,6 @@ export default function Discussion() {
     setIsAdmin(role === "admin");
     loadDiscussions();
     
-    // Poll for updates every 3 seconds
     const interval = setInterval(loadDiscussions, 3000);
     return () => clearInterval(interval);
   }, []);
@@ -24,7 +23,6 @@ export default function Discussion() {
       const response = await discussionAPI.getAllDiscussions();
       if (response.data.success) {
         setMessages(response.data.data);
-        // Auto-scroll to bottom
         setTimeout(() => {
           if (boxRef.current) {
             boxRef.current.scrollTop = boxRef.current.scrollHeight;
