@@ -16,7 +16,6 @@ export default function ManageStudents() {
   useEffect(() => {
     loadStudents();
     
-    // Poll for updates every 3 seconds
     const interval = setInterval(loadStudents, 3000);
     return () => clearInterval(interval);
   }, []);

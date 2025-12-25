@@ -18,7 +18,6 @@ export default function Profile() {
       if (response.data.success) {
         setStudent(response.data.data);
       } else {
-        // Try to get from sessionStorage as fallback
         const stored = sessionStorage.getItem("loggedInStudent");
         if (stored) {
           try {
@@ -29,7 +28,6 @@ export default function Profile() {
         }
       }
     } catch (error) {
-      // Fallback to sessionStorage
       const stored = sessionStorage.getItem("loggedInStudent");
       if (stored) {
         try {

@@ -12,7 +12,6 @@ export default function PYQs() {
   useEffect(() => {
     loadPYQs();
     
-    // Poll for updates every 5 seconds
     const interval = setInterval(loadPYQs, 5000);
     return () => clearInterval(interval);
   }, []);

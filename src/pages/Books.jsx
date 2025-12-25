@@ -23,7 +23,6 @@ export default function Books() {
     setIsAdmin(role === "admin");
     loadBooks();
     
-    // Poll for updates every 5 seconds
     const interval = setInterval(loadBooks, 5000);
     return () => clearInterval(interval);
   }, []);
@@ -51,8 +50,41 @@ export default function Books() {
     loadBooks();
   }, [departmentFilter, yearFilter, categoryFilter, query]);
 
+<<<<<<< HEAD
   const handlePreview = (viewLink) => {
     window.open(viewLink, '_blank');
+=======
+  const handlePreview = (fileData, mimeType) => {
+    const newWindow = window.open();
+    if (!newWindow) {
+      showToast("Please allow popups to preview files", "error");
+      return;
+    }
+    
+    newWindow.document.write(`
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>Preview</title>
+          <style>
+            body { margin: 0; padding: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; background: #f0f0f0; }
+            img { max-width: 100%; max-height: 100vh; }
+            embed, iframe { width: 100%; height: 100vh; border: none; }
+            object { width: 100%; height: 100vh; }
+          </style>
+        </head>
+        <body>
+          ${mimeType?.startsWith('image/') 
+            ? `<img src="${fileData}" alt="Preview" />`
+            : mimeType === 'application/pdf'
+            ? `<embed src="${fileData}" type="application/pdf" />`
+            : `<iframe src="${fileData}"></iframe>`
+          }
+        </body>
+      </html>
+    `);
+    newWindow.document.close();
+>>>>>>> ca9a899e0d6d351a139d910e65a5a06b6f999a21
   };
 
   const handleDelete = async (bookId) => {

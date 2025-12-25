@@ -15,7 +15,6 @@ export default function ManageNotes() {
   useEffect(() => {
     loadNotes();
     
-    // Poll for updates every 3 seconds
     const interval = setInterval(loadNotes, 3000);
     return () => clearInterval(interval);
   }, []);

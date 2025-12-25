@@ -25,7 +25,6 @@ export default function AdminDashboard() {
         </p>
 
         <div className="grid md:grid-cols-2 gap-6">
-          {/* Manage Books */}
           <motion.div
             whileHover={{ scale: 1.05 }}
             className="bg-purple-500 bg-opacity-20 p-6 rounded-xl text-center shadow-md"

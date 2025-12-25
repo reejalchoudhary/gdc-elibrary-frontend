@@ -1,26 +1,22 @@
 import axios from 'axios';
 
-// API Base URL - will be set from environment variable
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://gdc-elibrary-backend-z0cz.onrender.com/api';
 
-// Log API URL for debugging
 if (import.meta.env.DEV) {
   console.log('🔗 API Base URL:', API_BASE_URL);
   console.log('🌍 Environment:', import.meta.env.MODE);
   console.log('🔧 VITE_API_URL:', import.meta.env.VITE_API_URL || 'Not set (using Render default)');
 }
 
-// Create axios instance
 const api = axios.create({
   baseURL: API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
   },
-  withCredentials: true, // Important for CORS with credentials
-  timeout: 30000, // 30 second timeout
+  withCredentials: true,
+  timeout: 30000,
 });
 
-// Token management
 const getAccessToken = () => {
   return localStorage.getItem('accessToken') || sessionStorage.getItem('accessToken');
 };
@@ -44,7 +40,6 @@ const clearTokens = () => {
   sessionStorage.removeItem('loggedInStudent');
 };
 
-// Request interceptor - Add token to requests
 api.interceptors.request.use(
   (config) => {
     const token = getAccessToken();
@@ -58,13 +53,11 @@ api.interceptors.request.use(
   }
 );
 
-// Response interceptor - Handle token refresh
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
 
-    // If error is 401 and we haven't tried to refresh yet
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
 
@@ -76,7 +69,6 @@ api.interceptors.response.use(
           return Promise.reject(error);
         }
 
-        // Try to refresh token
         const response = await axios.post(`${API_BASE_URL}/auth/refresh`, {
           refreshToken,
         }, {
@@ -86,14 +78,11 @@ api.interceptors.response.use(
         const { accessToken, refreshToken: newRefreshToken } = response.data.data;
         setTokens(accessToken, newRefreshToken);
 
-        // Retry original request with new token
         originalRequest.headers.Authorization = `Bearer ${accessToken}`;
         return api(originalRequest);
       } catch (refreshError) {
-        // Refresh failed, clear tokens and redirect
         console.error('Token refresh failed:', refreshError);
         clearTokens();
-        // Only redirect if we're not already on login page
         if (!window.location.pathname.includes('login')) {
           window.location.href = '/login-selector';
         }
@@ -101,7 +90,6 @@ api.interceptors.response.use(
       }
     }
 
-    // Log error for debugging in production
     if (error.response) {
       console.error('API Error:', {
         status: error.response.status,
@@ -123,7 +111,6 @@ api.interceptors.response.use(
   }
 );
 
-// Auth API
 export const authAPI = {
   register: (studentData) => api.post('/auth/register', studentData),
   loginStudent: (email, password) => api.post('/auth/login/student', { email, password }),
@@ -133,13 +120,11 @@ export const authAPI = {
   refreshToken: (refreshToken) => api.post('/auth/refresh', { refreshToken }),
 };
 
-// Student API
 export const studentAPI = {
   getProfile: () => api.get('/students/profile'),
   updateProfile: (data) => api.put('/students/profile', data),
 };
 
-// Admin API
 export const adminAPI = {
   getAllStudents: (params = {}) => api.get('/admin/students', { params }),
   getPendingStudents: () => api.get('/admin/students/pending'),
@@ -154,9 +139,7 @@ export const adminAPI = {
   getDashboardStats: () => api.get('/admin/dashboard/stats'),
 };
 
-// Content API
 export const contentAPI = {
-  // Books
   getAllBooks: (params = {}) => api.get('/content/books', { params }),
   getBook: (bookId) => api.get(`/content/books/${bookId}`),
   uploadBook: (formData) => {
@@ -167,11 +150,10 @@ export const contentAPI = {
         Authorization: `Bearer ${token}`,
       },
       withCredentials: true,
-      timeout: 60000, // 60 seconds for file uploads
+      timeout: 60000,
     });
   },
 
-  // Notes
   getAllNotes: (params = {}) => api.get('/content/notes', { params }),
   getNote: (noteId) => api.get(`/content/notes/${noteId}`),
   uploadNote: (formData) => {
@@ -182,11 +164,10 @@ export const contentAPI = {
         Authorization: `Bearer ${token}`,
       },
       withCredentials: true,
-      timeout: 60000, // 60 seconds for file uploads
+      timeout: 60000, 
     });
   },
 
-  // PYQs
   getAllPYQs: (params = {}) => api.get('/content/pyqs', { params }),
   getPYQ: (pyqId) => api.get(`/content/pyqs/${pyqId}`),
   uploadPYQ: (formData) => {
@@ -197,18 +178,16 @@ export const contentAPI = {
         Authorization: `Bearer ${token}`,
       },
       withCredentials: true,
-      timeout: 60000, // 60 seconds for file uploads
+      timeout: 60000,
     });
   },
 };
 
-// Discussion API
 export const discussionAPI = {
   getAllDiscussions: () => api.get('/discussions'),
   createDiscussion: (text) => api.post('/discussions', { text }),
   deleteDiscussion: (messageId) => api.delete(`/discussions/${messageId}`),
 };
 
-// Export token management functions
 export { setTokens, clearTokens, getAccessToken };
 

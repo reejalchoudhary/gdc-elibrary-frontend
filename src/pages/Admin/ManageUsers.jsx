@@ -6,12 +6,10 @@ export default function ManageUsers() {
   const [approved, setApproved] = useState([]);
   const [loading, setLoading] = useState(true);
   
-  // Filter states for pending
   const [pendingSearch, setPendingSearch] = useState("");
   const [pendingDept, setPendingDept] = useState("All");
   const [pendingYear, setPendingYear] = useState("All");
   
-  // Filter states for approved
   const [approvedSearch, setApprovedSearch] = useState("");
   const [approvedDept, setApprovedDept] = useState("All");
   const [approvedYear, setApprovedYear] = useState("All");
@@ -19,7 +17,6 @@ export default function ManageUsers() {
   useEffect(() => {
     loadStudents();
     
-    // Poll for updates every 3 seconds
     const interval = setInterval(loadStudents, 3000);
     return () => clearInterval(interval);
   }, []);
@@ -79,7 +76,6 @@ export default function ManageUsers() {
     }
   };
 
-  // Filter functions
   const filterPending = (students) => {
     return students.filter((s) => {
       const matchesSearch = 
@@ -105,7 +101,6 @@ export default function ManageUsers() {
   const filteredPending = filterPending(pending);
   const filteredApproved = filterApproved(approved);
 
-  // Get unique departments and years for filters
   const allDepartments = ["All", "BA", "BSC", "BCOM", "BCA"];
   const allYears = ["All", "1st Year", "2nd Year", "3rd Year", "1st Semester", "2nd Semester", "3rd Semester", "4th Semester", "5th Semester", "6th Semester"];
 
@@ -121,11 +116,9 @@ export default function ManageUsers() {
     <div className="min-h-screen bg-gradient-to-br from-purple-600 via-pink-600 to-orange-500 p-8 text-white">
       <h1 className="text-4xl font-bold mb-8 text-center">👥 Manage Users</h1>
 
-      {/* Pending Student Requests Section */}
       <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 mb-8 shadow-xl border border-white/20">
         <h2 className="text-2xl font-bold mb-4 text-pink-300">Pending Student Requests</h2>
         
-        {/* Search and Filters */}
         <div className="mb-4 space-y-3">
           <div className="relative">
             <input
@@ -212,11 +205,9 @@ export default function ManageUsers() {
         )}
       </div>
 
-      {/* Approved Students Section */}
       <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 shadow-xl border border-white/20">
         <h2 className="text-2xl font-bold mb-4 text-yellow-300">Approved Students</h2>
         
-        {/* Search and Filters */}
         <div className="mb-4 space-y-3">
           <div className="relative">
             <input
