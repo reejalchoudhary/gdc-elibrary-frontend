@@ -1,0 +1,68 @@
+FIX: Google Drive Service Account Storage Quota Error
+=====================================================
+
+PROBLEM:
+Service accounts don't have their own storage quota. They can only upload files
+to folders that belong to regular Google accounts (like your Gmail account).
+
+SOLUTION:
+You need to create a folder in YOUR regular Google account and share it with
+the service account.
+
+STEP-BY-STEP FIX:
+=================
+
+1. CREATE A FOLDER IN YOUR GOOGLE ACCOUNT
+   ---------------------------------------
+   - Go to https://drive.google.com
+   - Make sure you're logged into YOUR regular Google account (not the service account)
+   - Click "New" > "Folder"
+   - Name it something like "E-Library Files" or "GDC Library"
+   - Create the folder
+
+2. GET THE FOLDER ID
+   ------------------
+   - Open the folder you just created
+   - Look at the URL in your browser
+   - The URL will be: https://drive.google.com/drive/folders/FOLDER_ID_HERE
+   - Copy the FOLDER_ID_HERE part
+   - Example: If URL is https://drive.google.com/drive/folders/1WIA6m9ZqgC0IxTSBOfzmy4WkyfTpWxkF
+             Then folder ID is: 1WIA6m9ZqgC0IxTSBOfzmy4WkyfTpWxkF
+
+3. SHARE THE FOLDER WITH SERVICE ACCOUNT
+   --------------------------------------
+   - Right-click on the folder > "Share"
+   - In the "Add people and groups" field, paste your SERVICE ACCOUNT EMAIL
+     (This is the GOOGLE_DRIVE_CLIENT_EMAIL value from your .env file)
+   - Example: elibrary-drive@your-project-id.iam.gserviceaccount.com
+   - Set permission to "Editor" (important!)
+   - Click "Send"
+   - You don't need to notify the service account, so you can uncheck the notification box
+
+4. UPDATE ENVIRONMENT VARIABLES
+   ------------------------------
+   - In Render Dashboard, go to your backend service
+   - Go to Environment tab
+   - Update GOOGLE_DRIVE_FOLDER_ID with the folder ID from step 2
+   - Save and redeploy
+
+5. VERIFY SETUP
+   -------------
+   - The folder should be in YOUR regular Google account's Drive
+   - The folder should be shared with the service account email
+   - The service account should have "Editor" permission
+   - GOOGLE_DRIVE_FOLDER_ID should be set in Render
+
+IMPORTANT NOTES:
+================
+- The folder MUST be in a regular Google account (your Gmail, etc.), NOT in the
+  service account's drive
+- The service account MUST have "Editor" permission (not just Viewer)
+- The folder ID is the long string of letters and numbers in the folder URL
+- After updating the folder ID in Render, you need to redeploy for changes to take effect
+
+TESTING:
+========
+After fixing, try uploading a file again. The file should appear in the folder
+you created in your Google Drive.
+

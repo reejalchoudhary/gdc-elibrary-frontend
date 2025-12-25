@@ -157,20 +157,38 @@ export default function Notes() {
               </p>
 
               <div className="flex justify-center gap-3">
-                <button
-                  onClick={() => handlePreview(note.viewLink)}
-                  className="px-4 py-2 bg-cyan-500 text-white rounded-lg hover:bg-cyan-600 text-sm font-medium transition-all"
-                >
-                  Preview
-                </button>
-                <a
-                  href={note.downloadLink}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 text-sm font-medium transition-all"
-                >
-                  Download
-                </a>
+                {note.viewLink ? (
+                  <button
+                    onClick={() => handlePreview(note.viewLink)}
+                    className="px-4 py-2 bg-cyan-500 text-white rounded-lg hover:bg-cyan-600 text-sm font-medium transition-all"
+                  >
+                    Preview
+                  </button>
+                ) : (
+                  <button
+                    disabled
+                    className="px-4 py-2 bg-gray-400 text-white rounded-lg text-sm font-medium cursor-not-allowed"
+                  >
+                    Preview
+                  </button>
+                )}
+                {note.downloadLink ? (
+                  <a
+                    href={note.downloadLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 text-sm font-medium transition-all"
+                  >
+                    Download
+                  </a>
+                ) : (
+                  <button
+                    disabled
+                    className="px-4 py-2 bg-gray-400 text-white rounded-lg text-sm font-medium cursor-not-allowed"
+                  >
+                    Download
+                  </button>
+                )}
               </div>
               <p className="text-xs text-gray-400 mt-3">
                 Uploaded: {new Date(note.createdAt).toLocaleString()}

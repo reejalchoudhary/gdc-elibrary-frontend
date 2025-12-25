@@ -50,41 +50,8 @@ export default function Books() {
     loadBooks();
   }, [departmentFilter, yearFilter, categoryFilter, query]);
 
-<<<<<<< HEAD
   const handlePreview = (viewLink) => {
     window.open(viewLink, '_blank');
-=======
-  const handlePreview = (fileData, mimeType) => {
-    const newWindow = window.open();
-    if (!newWindow) {
-      showToast("Please allow popups to preview files", "error");
-      return;
-    }
-    
-    newWindow.document.write(`
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <title>Preview</title>
-          <style>
-            body { margin: 0; padding: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; background: #f0f0f0; }
-            img { max-width: 100%; max-height: 100vh; }
-            embed, iframe { width: 100%; height: 100vh; border: none; }
-            object { width: 100%; height: 100vh; }
-          </style>
-        </head>
-        <body>
-          ${mimeType?.startsWith('image/') 
-            ? `<img src="${fileData}" alt="Preview" />`
-            : mimeType === 'application/pdf'
-            ? `<embed src="${fileData}" type="application/pdf" />`
-            : `<iframe src="${fileData}"></iframe>`
-          }
-        </body>
-      </html>
-    `);
-    newWindow.document.close();
->>>>>>> ca9a899e0d6d351a139d910e65a5a06b6f999a21
   };
 
   const handleDelete = async (bookId) => {
@@ -245,20 +212,38 @@ export default function Books() {
                   <p className="text-xs text-gray-500 mb-3">By: {book.uploaderName}</p>
 
                   <div className="flex gap-2">
-                    <button
-                      onClick={() => handlePreview(book.viewLink)}
-                      className="flex-1 bg-cyan-600 hover:bg-cyan-700 text-white py-2 rounded-lg text-center transition-colors flex items-center justify-center"
-                    >
-                      <Eye className="inline-block mr-1 w-4 h-4" /> Preview
-                    </button>
-                    <a
-                      href={book.downloadLink}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg text-center transition-colors flex items-center justify-center"
-                    >
-                      <Download className="inline-block mr-1 w-4 h-4" /> Download
-                    </a>
+                    {book.viewLink ? (
+                      <button
+                        onClick={() => handlePreview(book.viewLink)}
+                        className="flex-1 bg-cyan-600 hover:bg-cyan-700 text-white py-2 rounded-lg text-center transition-colors flex items-center justify-center"
+                      >
+                        <Eye className="inline-block mr-1 w-4 h-4" /> Preview
+                      </button>
+                    ) : (
+                      <button
+                        disabled
+                        className="flex-1 bg-gray-400 text-white py-2 rounded-lg text-center flex items-center justify-center cursor-not-allowed"
+                      >
+                        <Eye className="inline-block mr-1 w-4 h-4" /> Preview
+                      </button>
+                    )}
+                    {book.downloadLink ? (
+                      <a
+                        href={book.downloadLink}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg text-center transition-colors flex items-center justify-center"
+                      >
+                        <Download className="inline-block mr-1 w-4 h-4" /> Download
+                      </a>
+                    ) : (
+                      <button
+                        disabled
+                        className="flex-1 bg-gray-400 text-white py-2 rounded-lg text-center flex items-center justify-center cursor-not-allowed"
+                      >
+                        <Download className="inline-block mr-1 w-4 h-4" /> Download
+                      </button>
+                    )}
                   </div>
 
                   {isAdmin && (

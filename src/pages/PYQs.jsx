@@ -148,20 +148,38 @@ export default function PYQs() {
               </p>
 
               <div className="mt-4 flex gap-3">
-                <button
-                  onClick={() => handlePreview(file.viewLink)}
-                  className="bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded-lg shadow-md transition-transform hover:scale-105"
-                >
-                  Preview
-                </button>
-                <a
-                  href={file.downloadLink}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg shadow-md transition-transform hover:scale-105"
-                >
-                  Download
-                </a>
+                {file.viewLink ? (
+                  <button
+                    onClick={() => handlePreview(file.viewLink)}
+                    className="bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded-lg shadow-md transition-transform hover:scale-105"
+                  >
+                    Preview
+                  </button>
+                ) : (
+                  <button
+                    disabled
+                    className="bg-gray-400 text-white px-4 py-2 rounded-lg shadow-md cursor-not-allowed"
+                  >
+                    Preview
+                  </button>
+                )}
+                {file.downloadLink ? (
+                  <a
+                    href={file.downloadLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg shadow-md transition-transform hover:scale-105"
+                  >
+                    Download
+                  </a>
+                ) : (
+                  <button
+                    disabled
+                    className="bg-gray-400 text-white px-4 py-2 rounded-lg shadow-md cursor-not-allowed"
+                  >
+                    Download
+                  </button>
+                )}
               </div>
             </motion.div>
           ))}
