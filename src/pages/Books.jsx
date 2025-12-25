@@ -51,38 +51,8 @@ export default function Books() {
     loadBooks();
   }, [departmentFilter, yearFilter, categoryFilter, query]);
 
-  const handlePreview = (fileData, mimeType) => {
-    // Create a new window with proper content type
-    const newWindow = window.open();
-    if (!newWindow) {
-      showToast("Please allow popups to preview files", "error");
-      return;
-    }
-    
-    // Write the file content to the new window
-    newWindow.document.write(`
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <title>Preview</title>
-          <style>
-            body { margin: 0; padding: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; background: #f0f0f0; }
-            img { max-width: 100%; max-height: 100vh; }
-            embed, iframe { width: 100%; height: 100vh; border: none; }
-            object { width: 100%; height: 100vh; }
-          </style>
-        </head>
-        <body>
-          ${mimeType?.startsWith('image/') 
-            ? `<img src="${fileData}" alt="Preview" />`
-            : mimeType === 'application/pdf'
-            ? `<embed src="${fileData}" type="application/pdf" />`
-            : `<iframe src="${fileData}"></iframe>`
-          }
-        </body>
-      </html>
-    `);
-    newWindow.document.close();
+  const handlePreview = (viewLink) => {
+    window.open(viewLink, '_blank');
   };
 
   const handleDelete = async (bookId) => {
@@ -244,14 +214,15 @@ export default function Books() {
 
                   <div className="flex gap-2">
                     <button
-                      onClick={() => handlePreview(book.fileData, book.mimeType)}
+                      onClick={() => handlePreview(book.viewLink)}
                       className="flex-1 bg-cyan-600 hover:bg-cyan-700 text-white py-2 rounded-lg text-center transition-colors flex items-center justify-center"
                     >
                       <Eye className="inline-block mr-1 w-4 h-4" /> Preview
                     </button>
                     <a
-                      href={book.fileData}
-                      download={book.fileName}
+                      href={book.downloadLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
                       className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg text-center transition-colors flex items-center justify-center"
                     >
                       <Download className="inline-block mr-1 w-4 h-4" /> Download

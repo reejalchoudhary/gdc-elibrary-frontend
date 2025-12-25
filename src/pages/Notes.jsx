@@ -38,36 +38,8 @@ export default function Notes() {
     }
   };
 
-  const handlePreview = (fileData, mimeType) => {
-    const newWindow = window.open();
-    if (!newWindow) {
-      alert("Please allow popups to preview files");
-      return;
-    }
-    
-    newWindow.document.write(`
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <title>Preview</title>
-          <style>
-            body { margin: 0; padding: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; background: #f0f0f0; }
-            img { max-width: 100%; max-height: 100vh; }
-            embed, iframe { width: 100%; height: 100vh; border: none; }
-            object { width: 100%; height: 100vh; }
-          </style>
-        </head>
-        <body>
-          ${mimeType?.startsWith('image/') 
-            ? `<img src="${fileData}" alt="Preview" />`
-            : mimeType === 'application/pdf'
-            ? `<embed src="${fileData}" type="application/pdf" />`
-            : `<iframe src="${fileData}"></iframe>`
-          }
-        </body>
-      </html>
-    `);
-    newWindow.document.close();
+  const handlePreview = (viewLink) => {
+    window.open(viewLink, '_blank');
   };
 
   useEffect(() => {
@@ -187,14 +159,15 @@ export default function Notes() {
 
               <div className="flex justify-center gap-3">
                 <button
-                  onClick={() => handlePreview(note.fileData, note.mimeType)}
+                  onClick={() => handlePreview(note.viewLink)}
                   className="px-4 py-2 bg-cyan-500 text-white rounded-lg hover:bg-cyan-600 text-sm font-medium transition-all"
                 >
                   Preview
                 </button>
                 <a
-                  href={note.fileData}
-                  download={note.fileName}
+                  href={note.downloadLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 text-sm font-medium transition-all"
                 >
                   Download

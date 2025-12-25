@@ -35,36 +35,8 @@ export default function PYQs() {
     }
   };
 
-  const handlePreview = (fileData, mimeType) => {
-    const newWindow = window.open();
-    if (!newWindow) {
-      alert("Please allow popups to preview files");
-      return;
-    }
-    
-    newWindow.document.write(`
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <title>Preview</title>
-          <style>
-            body { margin: 0; padding: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; background: #f0f0f0; }
-            img { max-width: 100%; max-height: 100vh; }
-            embed, iframe { width: 100%; height: 100vh; border: none; }
-            object { width: 100%; height: 100vh; }
-          </style>
-        </head>
-        <body>
-          ${mimeType?.startsWith('image/') 
-            ? `<img src="${fileData}" alt="Preview" />`
-            : mimeType === 'application/pdf'
-            ? `<embed src="${fileData}" type="application/pdf" />`
-            : `<iframe src="${fileData}"></iframe>`
-          }
-        </body>
-      </html>
-    `);
-    newWindow.document.close();
+  const handlePreview = (viewLink) => {
+    window.open(viewLink, '_blank');
   };
 
   useEffect(() => {
@@ -178,14 +150,15 @@ export default function PYQs() {
 
               <div className="mt-4 flex gap-3">
                 <button
-                  onClick={() => handlePreview(file.fileData, file.mimeType)}
+                  onClick={() => handlePreview(file.viewLink)}
                   className="bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded-lg shadow-md transition-transform hover:scale-105"
                 >
                   Preview
                 </button>
                 <a
-                  href={file.fileData}
-                  download={file.fileName}
+                  href={file.downloadLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg shadow-md transition-transform hover:scale-105"
                 >
                   Download
