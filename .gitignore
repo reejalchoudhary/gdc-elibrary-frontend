@@ -1,0 +1,6 @@
+node_modules/
+.env
+dist/
+
+# Backend folder (deployed separately to Render)
+backend/
