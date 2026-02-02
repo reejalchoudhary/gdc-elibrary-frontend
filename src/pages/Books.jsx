@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
 import { Eye, Download, Trash2 } from "lucide-react";
 import { motion } from "framer-motion";
+import MaintenanceDialog from "../components/MaintenanceDialog";
 import { contentAPI, adminAPI } from "../services/api";
 
 export default function Books() {
+  const [showMaintenanceDialog, setShowMaintenanceDialog] = useState(true);
   const [books, setBooks] = useState([]);
   const [query, setQuery] = useState("");
   const [departmentFilter, setDepartmentFilter] = useState("");
@@ -271,6 +273,10 @@ export default function Books() {
           )}
         </motion.div>
       </div>
+         <MaintenanceDialog
+           open={showMaintenanceDialog}
+           onClose={() => setShowMaintenanceDialog(false)}
+          />
     </div>
   );
 }

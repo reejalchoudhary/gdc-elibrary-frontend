@@ -5,6 +5,7 @@ import Navbar from "./components/Navbar";
 import ScrollToTop from "./components/ScrollToTop";
 import Home from "./pages/Home";
 import Books from "./pages/Books";
+import Contact from "./pages/Contact";
 import Upload from "./pages/Upload";
 import PYQs from "./pages/PYQs";
 import Discussion from "./pages/Discussion";
@@ -28,6 +29,7 @@ import ManagePYQs from "./pages/Admin/ManagePYQs";
 import ManageDiscussions from "./pages/Admin/ManageDiscussions";
 import ManageUsers from "./pages/Admin/ManageUsers";
 import { authAPI, clearTokens } from "./services/api";
+import ManualResources from "./pages/ManualResources";
 
 export default function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -38,7 +40,7 @@ export default function App() {
     const checkAuth = async () => {
       const sessionLoggedIn = sessionStorage.getItem("loggedIn") === "true";
       const sessionRole = sessionStorage.getItem("role");
-      
+
       if (sessionLoggedIn && sessionRole) {
         setIsLoggedIn(true);
         setRole(sessionRole);
@@ -46,7 +48,10 @@ export default function App() {
         return;
       }
 
-      const token = localStorage.getItem("accessToken") || sessionStorage.getItem("accessToken");
+      const token =
+        localStorage.getItem("accessToken") ||
+        sessionStorage.getItem("accessToken");
+
       if (token) {
         try {
           const response = await authAPI.getCurrentUser();
@@ -57,7 +62,10 @@ export default function App() {
             sessionStorage.setItem("loggedIn", "true");
             sessionStorage.setItem("role", user.role);
             if (user.role === "student") {
-              sessionStorage.setItem("loggedInStudent", JSON.stringify(user));
+              sessionStorage.setItem(
+                "loggedInStudent",
+                JSON.stringify(user)
+              );
             }
           } else {
             clearTokens();
@@ -66,12 +74,13 @@ export default function App() {
           }
         } catch (error) {
           console.error("Auth check failed:", error);
-          if (error.response?.status === 401 || error.response?.status === 403) {
+          if (
+            error.response?.status === 401 ||
+            error.response?.status === 403
+          ) {
             clearTokens();
             setIsLoggedIn(false);
             setRole("");
-          } else {
-            console.warn("Network error during auth check, keeping current state");
           }
         }
       } else {
@@ -115,7 +124,7 @@ export default function App() {
 
   return (
     <Router>
-      <ScrollToTop /> 
+      <ScrollToTop />
       <div className="min-h-screen flex flex-col text-gray-800">
         {role !== "admin" && (
           <Navbar onLogout={handleLogout} isLoggedIn={isLoggedIn} role={role} />
@@ -123,22 +132,34 @@ export default function App() {
 
         <main className="flex-grow">
           <Routes>
-            
             <Route
               path="/"
               element={<RedirectLogic isLoggedIn={isLoggedIn} role={role} />}
             />
+
             <Route path="/login-selector" element={<LoginSelector />} />
             <Route
               path="/student-login"
-              element={<StudentLogin onLogin={(role, userData) => handleLogin(role, userData)} />}
+              element={
+                <StudentLogin
+                  onLogin={(role, userData) =>
+                    handleLogin(role, userData)
+                  }
+                />
+              }
             />
             <Route
               path="/admin-login"
-              element={<AdminLogin onLogin={(role, userData) => handleLogin(role, userData)} />}
+              element={
+                <AdminLogin
+                  onLogin={(role, userData) =>
+                    handleLogin(role, userData)
+                  }
+                />
+              }
             />
-            <Route path="/profile" element={<Profile />} />
 
+            <Route path="/profile" element={<Profile />} />
             <Route path="/register" element={<Register />} />
 
             <Route path="/student-dashboard" element={<StudentDashboard />} />
@@ -151,13 +172,22 @@ export default function App() {
             <Route path="/notes" element={<Notes />} />
             <Route path="/discussion" element={<Discussion />} />
 
-            
+            <Route path="/manual-resources" element={<ManualResources />} />
+            <Route path="/contact" element={<Contact />} />
+
+            {/* ADMIN */}
             <Route path="/admin/manage-notes" element={<ManageNotes />} />
             <Route path="/admin/manage-books" element={<ManageBooks />} />
             <Route path="/admin/manage-pyqs" element={<ManagePYQs />} />
-            <Route path="/admin/manage-discussions" element={<ManageDiscussions />} />
+            <Route
+              path="/admin/manage-discussions"
+              element={<ManageDiscussions />}
+            />
             <Route path="/admin/manage-users" element={<ManageUsers />} />
-            <Route path="/admin/manage-students" element={<ManageStudents />} />
+            <Route
+              path="/admin/manage-students"
+              element={<ManageStudents />}
+            />
           </Routes>
         </main>
 

@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
+import MaintenanceDialog from "../components/MaintenanceDialog";
 import { contentAPI, adminAPI } from "../services/api";
 
 export default function Notes() {
+  const [showMaintenanceDialog, setShowMaintenanceDialog] = useState(true);
   const [notes, setNotes] = useState([]);
   const [search, setSearch] = useState("");
   const [department, setDepartment] = useState("All");
@@ -206,6 +208,10 @@ export default function Notes() {
           ))}
         </motion.div>
       )}
+      <MaintenanceDialog
+         open={showMaintenanceDialog}
+         onClose={() => setShowMaintenanceDialog(false)}
+      />
     </div>
   );
 }

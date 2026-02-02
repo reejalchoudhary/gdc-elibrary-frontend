@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
+
 import img1 from "../assets/home1.jpg";
 import img2 from "../assets/home2.jpg";
 import img3 from "../assets/home3.jpg";
@@ -9,141 +9,106 @@ import img5 from "../assets/home5.jpg";
 
 export default function Home() {
   const [selectedDept, setSelectedDept] = useState("");
+  const [index, setIndex] = useState(0);
   const navigate = useNavigate();
 
   const departments = ["BA", "BSc", "BCom", "BCA"];
-
-  const images = [img1, img2, img3, img4, img5];    
-  const [index, setIndex] = useState(0);
+  const images = [img1, img2, img3, img4, img5];
 
   useEffect(() => {
     const interval = setInterval(() => {
       setIndex((prev) => (prev + 1) % images.length);
-    }, 3000); 
+    }, 4000); 
 
     return () => clearInterval(interval);
-  }, []);
-
-  const handleSelect = (dept) => {
-    setSelectedDept(dept);
-  };
+  }, [images.length]);
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-6 relative overflow-hidden">
+    <div className="relative min-h-screen flex flex-col items-center justify-center px-4 py-10 overflow-hidden">
 
       <div className="absolute inset-0 -z-10">
         {images.map((img, i) => (
-          <motion.div
+          <div
             key={i}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: index === i ? 1 : 0 }}
-            transition={{ duration: 1.2, ease: "easeInOut" }}
-            className="absolute inset-0 bg-cover bg-center"
+            className="absolute inset-0 bg-cover bg-center transition-opacity duration-1000"
             style={{
               backgroundImage: `url(${img})`,
+              opacity: index === i ? 1 : 0,
             }}
-          ></motion.div>
+          />
         ))}
-
-        <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/20 to-black/40"></div>
+        <div className="absolute inset-0 bg-black/40" />
       </div>
 
-      <div className="absolute w-72 h-72 bg-purple-300 rounded-full mix-blend-multiply filter blur-3xl opacity-40 animate-blob"></div>
-      <div className="absolute w-72 h-72 bg-pink-300 rounded-full mix-blend-multiply filter blur-3xl opacity-40 animate-blob animation-delay-2000"></div>
-      <div className="absolute w-72 h-72 bg-indigo-300 rounded-full mix-blend-multiply filter blur-3xl opacity-40 animate-blob animation-delay-4000"></div>
+      <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-white text-center mb-4 leading-tight">
+         Welcome to <br className="sm:hidden" />
+        GDC Nagrota Surian E-Library
+      </h1>
 
-      <motion.h1
-        className="relative text-5xl font-extrabold text-white drop-shadow-lg text-center mb-6"
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-      >
-        🎓 Welcome to GDC Nagrota Surian E-Library
-      </motion.h1>
-
-      <motion.p
-        className="relative text-gray-100 text-lg text-center mb-10 max-w-2xl drop-shadow"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.3 }}
-      >
+      <p className="text-gray-200 text-sm sm:text-base md:text-lg text-center mb-8 max-w-xl px-2">
         Select your department below to explore notes, PYQs, and study materials
         designed for your course.
-      </motion.p>
+      </p>
 
-     
-      <motion.div
-        className="relative grid grid-cols-2 md:grid-cols-4 gap-6 mb-12"
-        initial={{ opacity: 0, y: 30 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.5 }}
-      >
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-10 w-full max-w-md">
         {departments.map((dept) => (
-          <motion.button
+          <button
             key={dept}
-            onClick={() => handleSelect(dept)}
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.95 }}
-            className={`px-6 py-4 rounded-xl font-semibold shadow-xl backdrop-blur-md transition-all duration-300 ${
+            onClick={() => setSelectedDept(dept)}
+            className={`py-3 rounded-xl font-semibold transition ${
               selectedDept === dept
-                ? "bg-purple-600 text-white shadow-purple-400/60"
-                : "bg-white/60 text-purple-800 hover:bg-purple-100"
+                ? "bg-purple-600 text-white"
+                : "bg-white/80 text-purple-800 hover:bg-purple-100"
             }`}
           >
             {dept}
-          </motion.button>
+          </button>
         ))}
-      </motion.div>
+      </div>
 
-      
       {selectedDept && (
-        <motion.div
-          className="relative bg-white/70 backdrop-blur-lg shadow-2xl rounded-2xl p-10 w-full max-w-3xl text-center border border-purple-200"
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-        >
-          <h2 className="text-3xl font-bold text-purple-700 mb-8">
+        <div className="bg-white/90 rounded-2xl p-6 sm:p-8 w-full max-w-xl text-center shadow-xl">
+          <h2 className="text-xl sm:text-2xl font-bold text-purple-700 mb-6">
             📚 {selectedDept} Department Resources
           </h2>
 
-          <div className="flex flex-wrap justify-center gap-6">
-            <motion.button
+          <div className="flex flex-wrap justify-center gap-4">
+            <button
               onClick={() => navigate("/notes")}
-              whileHover={{ scale: 1.05 }}
-              className="bg-purple-500 hover:bg-purple-600 text-white px-6 py-3 rounded-lg font-semibold shadow-md"
+              className="bg-purple-500 hover:bg-purple-600 text-white px-5 py-3 rounded-lg font-semibold"
             >
               📒 Notes
-            </motion.button>
+            </button>
 
-            <motion.button
+            <button
               onClick={() => navigate("/pyqs")}
-              whileHover={{ scale: 1.05 }}
-              className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold shadow-md"
+              className="bg-blue-500 hover:bg-blue-600 text-white px-5 py-3 rounded-lg font-semibold"
             >
               📄 PYQs
-            </motion.button>
+            </button>
 
-            <motion.button
+            <button
               onClick={() => navigate("/books")}
-              whileHover={{ scale: 1.05 }}
-              className="bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-lg font-semibold shadow-md"
+              className="bg-green-500 hover:bg-green-600 text-white px-5 py-3 rounded-lg font-semibold"
             >
               📘 Books
-            </motion.button>
+            </button>
 
-            <motion.button
+            <button
               onClick={() => navigate("/upload")}
-              whileHover={{ scale: 1.05 }}
-              className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-lg font-semibold shadow-md"
+              className="bg-orange-500 hover:bg-orange-600 text-white px-5 py-3 rounded-lg font-semibold"
             >
               ⬆️ Upload Material
-            </motion.button>
+            </button>
           </div>
 
-          <p className="text-sm text-gray-600 mt-8">
+          <p className="text-xs sm:text-sm text-gray-600 mt-6">
             Selected Department:{" "}
-            <span className="font-semibold text-purple-700">{selectedDept}</span>
+            <span className="font-semibold text-purple-700">
+              {selectedDept}
+            </span>
           </p>
-        </motion.div>
+        </div>
       )}
     </div>
   );

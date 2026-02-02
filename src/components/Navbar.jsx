@@ -16,9 +16,13 @@ export default function Navbar({ onLogout, isLoggedIn }) {
 
   return (
     <nav className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-lg px-6 py-3 flex justify-between items-center relative">
-     
+      
       <div className="flex items-center gap-3 cursor-pointer">
-        <Link to="/home" className="flex items-center gap-3" onClick={() => setMenuOpen(false)}>
+        <Link
+          to="/home"
+          className="flex items-center gap-3"
+          onClick={() => setMenuOpen(false)}
+        >
           <img
             src={collegeLogo}
             alt="GDC Nagrota Surian Logo"
@@ -30,14 +34,17 @@ export default function Navbar({ onLogout, isLoggedIn }) {
         </Link>
       </div>
 
-     
-      <div className="md:hidden cursor-pointer" onClick={toggleMenu} aria-label="Toggle menu">
+      <div className="md:hidden cursor-pointer" onClick={toggleMenu}>
         {menuOpen ? <X size={26} /> : <Menu size={26} />}
       </div>
+
       <div
         className={`${
           menuOpen ? "flex" : "hidden"
-        } md:flex flex-col md:flex-row items-center absolute md:static top-full left-0 w-full md:w-auto bg-gradient-to-b md:bg-none from-purple-700 to-indigo-700 md:from-transparent md:to-transparent z-10 md:z-auto md:space-x-6 p-4 md:p-0 transition-all duration-300`}
+        } md:flex flex-col md:flex-row items-center fixed md:static top-[64px] md:top-auto
+          left-0 w-full md:w-auto max-h-[70vh] md:max-h-none overflow-y-auto md:overflow-visible
+          bg-gradient-to-b md:bg-none from-purple-700 to-indigo-700 z-[9999] md:z-auto
+          md:space-x-6 p-4 md:p-0 transition-all duration-300`}
       >
         {isLoggedIn ? (
           <>
@@ -51,7 +58,7 @@ export default function Navbar({ onLogout, isLoggedIn }) {
 
             <Link
               to="/books"
-              className="hover:text-yellow-300 transition py-2 md:py-0"
+              className="font-semibold text-red-500 hover:text-yellow-300 transition py-2 md:py-0"
               onClick={() => setMenuOpen(false)}
             >
               Books
@@ -59,7 +66,7 @@ export default function Navbar({ onLogout, isLoggedIn }) {
 
             <Link
               to="/pyqs"
-              className="hover:text-yellow-300 transition py-2 md:py-0"
+              className="font-semibold text-red-500 hover:text-yellow-300 transition py-2 md:py-0"
               onClick={() => setMenuOpen(false)}
             >
               PYQs
@@ -67,10 +74,29 @@ export default function Navbar({ onLogout, isLoggedIn }) {
 
             <Link
               to="/notes"
-              className="hover:text-yellow-300 transition py-2 md:py-0"
+              className="font-semibold text-red-500 hover:text-yellow-300 transition py-2 md:py-0"
               onClick={() => setMenuOpen(false)}
             >
               Notes
+            </Link>
+
+            <Link
+              to="/manual-resources"
+              className="font-semibold text-green-400 hover:text-yellow-300 flex items-center gap-2 py-2 md:py-0"
+              onClick={() => setMenuOpen(false)}
+            >
+              Study Resources
+              <span className="text-xs bg-red-500 text-white px-2 py-0.5 rounded-full">
+                NEW
+              </span>
+            </Link>
+
+            <Link
+              to="/contact"
+              className="hover:text-yellow-300 transition py-2 md:py-0"
+              onClick={() => setMenuOpen(false)}
+            >
+              Contact Us
             </Link>
 
             <Link
@@ -94,9 +120,7 @@ export default function Navbar({ onLogout, isLoggedIn }) {
                 navigate("/profile");
                 setMenuOpen(false);
               }}
-              className="mt-3 md:mt-0 hover:text-yellow-300 transition-transform transform hover:scale-110 flex items-center"
-              title="View Profile"
-              aria-label="View Profile"
+              className="mt-3 md:mt-0 hover:text-yellow-300 transition-transform transform hover:scale-110"
             >
               <UserCircle size={30} className="text-yellow-300" />
             </button>
@@ -114,7 +138,7 @@ export default function Navbar({ onLogout, isLoggedIn }) {
         ) : (
           <Link
             to="/login-selector"
-            className="hover:text-yellow-300 transition py-2 md:py-0"
+            className="hover:text-yellow-300 transition"
             onClick={() => setMenuOpen(false)}
           >
             Login

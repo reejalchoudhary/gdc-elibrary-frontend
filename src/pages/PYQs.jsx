@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
+import MaintenanceDialog from "../components/MaintenanceDialog";
 import { contentAPI } from "../services/api";
 
 export default function PYQs() {
+  const [showMaintenanceDialog, setShowMaintenanceDialog] = useState(true);
   const [pyqs, setPyqs] = useState([]);
   const [search, setSearch] = useState("");
   const [departmentFilter, setDepartmentFilter] = useState("");
@@ -194,6 +196,10 @@ export default function PYQs() {
           ))}
         </motion.div>
       )}
+      <MaintenanceDialog
+         open={showMaintenanceDialog}
+         onClose={() => setShowMaintenanceDialog(false)}
+      />
     </div>
   );
 }
