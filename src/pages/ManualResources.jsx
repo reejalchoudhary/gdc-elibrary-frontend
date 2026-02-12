@@ -1,26 +1,27 @@
+import MATERIALS from "../Data/ManualResourcesData";
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Upload } from "lucide-react";
 
-const MATERIALS = [
+// const MATERIALS = [
 
-  {
-    title: "Operating System Book",
-    type: "Book",
-    department: "BCA",
-    year: "3rd Year",
-    uploadedBy: "Admin",
-    link: "",
-  },
-  {
-    title: "C Programming Notes",
-    type: "Notes",
-    department: "BCA",
-    year: "1st Year",
-    uploadedBy: "Admin",
-    link: "",
-  },
-];
+//   {
+//     title: "Operating System Book",
+//     type: "Book",
+//     department: "BCA",
+//     year: "3rd Year",
+//     uploadedBy: "Admin",
+//     link: "",
+//   },
+//   {
+//     title: "C Programming Notes",
+//     type: "Notes",
+//     department: "BCA",
+//     year: "1st Year",
+//     uploadedBy: "Admin",
+//     link: "",
+//   },
+// ];
 
 const TYPE_STYLES = {
   Notes: {

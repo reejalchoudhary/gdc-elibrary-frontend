@@ -1,4 +1,5 @@
-import Img from "../assets/reejal.jpg";
+import reejal from "../assets/reejal.jpg";
+import shiansh from "../assets/shivansh.jpeg";
 import { motion } from "framer-motion";
 import {
   User,
@@ -49,7 +50,7 @@ export default function Contact() {
 
             <div className="flex flex-col sm:flex-row gap-6 items-start sm:items-center">
               <img
-                src={Img}
+                src={reejal}
                 alt="Reejal Choudhary"
                 className="w-24 h-24 rounded-full border-4 border-white shadow-md object-cover"
               />
@@ -63,8 +64,8 @@ export default function Contact() {
                 </p>
 
                 <p className="text-sm leading-relaxed opacity-95 max-w-3xl">
-                  Leads backend development, upload infrastructure, database flow optimization,
-                   and production issue debugging under peak load conditions.
+                  Builds the backend, optimizes the database, and fights production bugs at midnight 
+                  so the site never crashes when students suddenly decide to study.
                 </p>
 
                 <div className="mt-4 flex gap-4">
@@ -100,7 +101,7 @@ export default function Contact() {
 
             <div className="flex flex-col sm:flex-row gap-6 items-start sm:items-center">
               <img
-                src="/shivansh.jpg"
+                src={shiansh}
                 alt="Shivansh"
                 className="w-24 h-24 rounded-full border-4 border-white shadow-md object-cover"
               />
@@ -114,8 +115,8 @@ export default function Contact() {
                 </p>
 
                 <p className="text-sm leading-relaxed opacity-95 max-w-3xl">
-                  Designs layouts, animations, responsiveness,
-                  and ensures the site still looks good on mobile phones at 2 AM.
+                  Leads frontend development, responsive design, and user experience, 
+                  making sure everything loads smoothly for students who click everything twice.
                 </p>
 
                 <div className="mt-4 flex gap-4">
