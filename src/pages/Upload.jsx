@@ -8,7 +8,7 @@ import up2 from "../assets/upload2.jpg";
 import up3 from "../assets/upload3.jpg";
 
 const UPLOAD_DISABLED = true; 
-const GOOGLE_FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLSfFUxqNyh6OzHI4sBkTqjaWTq5wiOK4VeFO0_Vrt9qM79oE5g/viewform?usp=dialog"; // 🔗 ADD YOUR FORM LINK
+const GOOGLE_FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLSfFUxqNyh6OzHI4sBkTqjaWTq5wiOK4VeFO0_Vrt9qM79oE5g/viewform?usp=dialog";
 
 function Toast({ message, type = "success", onClose }) {
   return (

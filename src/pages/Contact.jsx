@@ -60,7 +60,7 @@ export default function Contact() {
                   <User /> Reejal Choudhary
                 </h2>
                 <p className="text-sm opacity-90 mb-3">
-                  Student – BCA 4th Semester
+                  Student – BCA 5th Semester
                 </p>
 
                 <p className="text-sm leading-relaxed opacity-95 max-w-3xl">
@@ -111,7 +111,7 @@ export default function Contact() {
                   <User /> Shivansh
                 </h2>
                 <p className="text-sm opacity-90 mb-3">
-                  Student – BCA 4th Semester
+                  Student – BCA 5th Semester
                 </p>
 
                 <p className="text-sm leading-relaxed opacity-95 max-w-3xl">

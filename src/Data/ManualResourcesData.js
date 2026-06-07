@@ -1,6 +1,6 @@
 const manualResourcesData = [
   {
-    title: "Operatinsacacacg System Book",
+    title: "Opera System Book",
     type: "Book",
     department: "BCA",
     year: "3rd Year",
@@ -8,7 +8,7 @@ const manualResourcesData = [
     link: "",
   },
   {
-    title: "C Progdesadcascsacramming Notes",
+    title: "C Programming Notes",
     type: "Notes",
     department: "BCA",
     year: "1st Year",

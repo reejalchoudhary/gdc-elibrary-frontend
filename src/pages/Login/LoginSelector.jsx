@@ -1,10 +1,29 @@
 import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+
 import logo from "../../assets/logo.png";
+import MaintenanceModal from "../../components/MaintenanceModal";
+
 
 export default function LoginSelector() {
   const navigate = useNavigate();
+  const MAINTENANCE_MODE = true;
+  const [showMaintenance, setShowMaintenance] = useState(false);
+
+      useEffect(() => {
+      if (!MAINTENANCE_MODE) return;
+      const timer = setTimeout(() => {
+      setShowMaintenance(true);
+      }, 1500); 
+
+      return () => clearTimeout(timer);
+
+  }, []);
 
   return (
+   <>
+
+
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-600 via-indigo-600 to-pink-500 px-4">
       
       <div
@@ -69,5 +88,10 @@ export default function LoginSelector() {
         </p>
       </div>
     </div>
+      <MaintenanceModal
+        isOpen={showMaintenance}
+        onClose={() => setShowMaintenance(false)}
+      />
+    </>
   );
 }
