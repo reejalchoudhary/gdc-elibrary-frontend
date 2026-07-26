@@ -4,5 +4,5 @@ dist/
 README.md
 .vscode/
 
-# Backend folder (deployed separately to Render)
+
 backend/

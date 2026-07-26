@@ -1,5 +1,5 @@
-import MATERIALS from "../Data/ManualResourcesData";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { resourceAPI } from "../services/api";
 import { motion } from "framer-motion";
 import { Upload } from "lucide-react";
 
@@ -47,7 +47,25 @@ export default function ManualResources() {
   const [year, setYear] = useState("All");
   const [visibleCount, setVisibleCount] = useState(6); 
 
-  const filteredMaterials = MATERIALS.filter((item) => {
+  const [materials, setMaterials] = useState([]);
+const [loading, setLoading] = useState(true);
+
+useEffect(() => {
+  fetchResources();
+}, []);
+
+const fetchResources = async () => {
+  try {
+    const response = await resourceAPI.getAllResources();
+    setMaterials(response.data.data);
+  } catch (error) {
+    console.error("Error fetching resources:", error);
+  } finally {
+    setLoading(false);
+  }
+};
+
+  const filteredMaterials = materials.filter((item) => {
     const matchesDepartment =
       department === "All" || item.department === department;
     const matchesType = type === "All" || item.type === type;
@@ -56,6 +74,13 @@ export default function ManualResources() {
   });
 
   const visibleMaterials = filteredMaterials.slice(0, visibleCount);
+  if (loading) {
+  return (
+    <div className="min-h-screen flex items-center justify-center">
+      <p className="text-lg font-semibold">Loading Resources...</p>
+    </div>
+  );
+}
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-100 via-purple-100 to-indigo-100 px-3 py-6">
@@ -136,7 +161,7 @@ export default function ManualResources() {
                     </div>
 
                     <a
-                      href={item.link}
+                      href={item.driveLink}
                       target="_blank"
                       rel="noreferrer"
                       className={`mt-3 block w-full text-center px-3 py-1.5 text-xs rounded-md font-semibold transition ${styles.button}`}

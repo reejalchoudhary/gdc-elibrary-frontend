@@ -191,3 +191,6 @@ export const discussionAPI = {
 
 export { setTokens, clearTokens, getAccessToken };
 
+export const resourceAPI = {
+  getAllResources: () => api.get("/resources"),
+};
