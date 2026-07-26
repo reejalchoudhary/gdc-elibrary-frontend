@@ -25,27 +25,51 @@ export default function ManageResources() {
   const [yearFilter, setYearFilter] = useState("All");
   const [statusFilter, setStatusFilter] = useState("All");
 
-  useEffect(() => {
-    fetchResources();
-  }, []);
+useEffect(() => {
+  fetchResources(true);
 
-  const fetchResources = async () => {
-    try {
-      const response = await resourceAPI.getAllResourcesAdmin();
-      setResources(response.data.data || []);
-    } catch (error) {
-      console.error(error);
+  const interval = setInterval(() => {
+    fetchResources(false);
+  }, 5000);
 
+  return () => clearInterval(interval);
+}, []);
+
+const fetchResources = async (showLoader = false) => {
+  try {
+    if (showLoader) {
+      setLoading(true);
+    }
+
+    const response = await resourceAPI.getAllResourcesAdmin();
+
+    const newData = response.data.data || [];
+
+    setResources((prev) => {
+      if (JSON.stringify(prev) === JSON.stringify(newData)) {
+        return prev;
+      }
+      return newData;
+    });
+
+  } catch (error) {
+    console.error(error);
+
+    if (showLoader) {
       Swal.fire({
         icon: "error",
         title: "Oops...",
         text: "Failed to fetch resources.",
         confirmButtonColor: "#7c3aed",
       });
-    } finally {
+    }
+
+  } finally {
+    if (showLoader) {
       setLoading(false);
     }
-  };
+  }
+};
 
   const stats = useMemo(() => {
     return {
@@ -130,7 +154,7 @@ export default function ManageResources() {
 
       showSuccess("Resource Approved");
 
-      fetchResources();
+      fetchResources(false);
     } catch (error) {
       console.error(error);
       showError();
@@ -155,7 +179,7 @@ export default function ManageResources() {
 
       showSuccess("Resource Rejected");
 
-      fetchResources();
+      fetchResources(false);
     } catch (error) {
       console.error(error);
       showError();
@@ -180,7 +204,7 @@ export default function ManageResources() {
 
       showSuccess("Resource Deleted");
 
-      fetchResources();
+      fetchResources(false);
     } catch (error) {
       console.error(error);
       showError();

@@ -49,22 +49,44 @@ export default function ManualResources() {
   const [visibleCount, setVisibleCount] = useState(6); 
 
   const [materials, setMaterials] = useState([]);
-const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(true);
 
-useEffect(() => {
-  fetchResources();
-}, []);
+    useEffect(() => {
+      fetchResources(true);
 
-const fetchResources = async () => {
-  try {
-    const response = await resourceAPI.getAllResources();
-    setMaterials(response.data.data);
-  } catch (error) {
-    console.error("Error fetching resources:", error);
-  } finally {
-    setLoading(false);
-  }
-};
+      const interval = setInterval(() => {
+        fetchResources(false);
+      }, 5000);
+
+      return () => clearInterval(interval);
+    }, []);
+
+    const fetchResources = async (showLoader = false) => {
+      try {
+        if (showLoader) {
+          setLoading(true);
+        }
+
+        const response = await resourceAPI.getAllResources();
+
+        const newData = response.data.data || [];
+
+        setMaterials((prev) => {
+          if (JSON.stringify(prev) === JSON.stringify(newData)) {
+            return prev;
+          }
+
+          return newData;
+        });
+
+      } catch (error) {
+        console.error("Error fetching resources:", error);
+      } finally {
+        if (showLoader) {
+          setLoading(false);
+        }
+      }
+    };
 
   const filteredMaterials = materials.filter((item) => {
     const matchesDepartment =
@@ -140,7 +162,7 @@ const fetchResources = async () => {
 
                 return (
                   <motion.div
-                    key={index}
+                    key={item._id}
                     whileHover={{ scale: 1.03 }}
                     className={`rounded-xl shadow-lg p-3 sm:p-4 text-white bg-gradient-to-br ${styles.card}`}
                   >

@@ -7,7 +7,7 @@ import MaintenanceModal from "../../components/MaintenanceModal";
 
 export default function LoginSelector() {
   const navigate = useNavigate();
-  const MAINTENANCE_MODE = true;
+  const MAINTENANCE_MODE = false;
   const [showMaintenance, setShowMaintenance] = useState(false);
 
       useEffect(() => {
