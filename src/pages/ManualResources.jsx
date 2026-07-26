@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { resourceAPI } from "../services/api";
 import { motion } from "framer-motion";
@@ -160,14 +161,23 @@ const fetchResources = async () => {
                       </p>
                     </div>
 
-                    <a
-                      href={item.driveLink}
-                      target="_blank"
-                      rel="noreferrer"
-                      className={`mt-3 block w-full text-center px-3 py-1.5 text-xs rounded-md font-semibold transition ${styles.button}`}
-                    >
-                      Get Access 🔗
-                    </a>
+                    <div className="mt-3 grid grid-cols-2 gap-2">
+
+                        <Link
+                          to={`/resource/${item._id}`}
+                          className={`text-center px-3 py-2 text-xs rounded-md font-semibold transition ${styles.button}`}
+                        >
+                          👁 Preview
+                        </Link>
+
+                          <a
+                            href={`https://drive.google.com/uc?export=download&id=${item.fileId}`}
+                            className="text-center px-3 py-2 text-xs rounded-md font-semibold bg-green-600 hover:bg-green-700 text-white transition"
+                          >
+                            ⬇ Download
+                          </a>
+
+                    </div>
                   </motion.div>
                 );
               })}

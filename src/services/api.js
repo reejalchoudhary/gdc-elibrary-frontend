@@ -192,5 +192,13 @@ export const discussionAPI = {
 export { setTokens, clearTokens, getAccessToken };
 
 export const resourceAPI = {
+  // Student
   getAllResources: () => api.get("/resources"),
+  getResource: (id) => api.get(`/resources/${id}`),
+
+  // Admin
+  getAllResourcesAdmin: () => api.get("/resources/admin"),
+  approveResource: (id) => api.patch(`/resources/${id}/approve`),
+  rejectResource: (id) => api.patch(`/resources/${id}/reject`),
+  deleteResource: (id) => api.delete(`/resources/${id}`),
 };

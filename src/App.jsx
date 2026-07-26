@@ -28,8 +28,11 @@ import ManageBooks from "./pages/Admin/ManageBooks";
 import ManagePYQs from "./pages/Admin/ManagePYQs";
 import ManageDiscussions from "./pages/Admin/ManageDiscussions";
 import ManageUsers from "./pages/Admin/ManageUsers";
+import ManageResources from "./pages/Admin/ManageResources";
+import AdminAnalytics from "./pages/Admin/AdminAnalytics";
 import { authAPI, clearTokens } from "./services/api";
 import ManualResources from "./pages/ManualResources";
+import ViewResource from "./pages/ViewResource";
 
 export default function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -173,11 +176,21 @@ export default function App() {
             <Route path="/discussion" element={<Discussion />} />
 
             <Route path="/manual-resources" element={<ManualResources />} />
+            <Route path="/resource/:id" element={<ViewResource />} />
+            <Route path="/admin/resource/:id" element={<ViewResource />} />
             <Route path="/contact" element={<Contact />} />
 
             {/* ADMIN */}
             <Route path="/admin/manage-notes" element={<ManageNotes />} />
             <Route path="/admin/manage-books" element={<ManageBooks />} />
+            <Route
+              path="/admin/manage-resources"
+              element={<ManageResources />}
+            />
+            <Route
+              path="/admin/analytics"
+              element={<AdminAnalytics />}
+            />
             <Route path="/admin/manage-pyqs" element={<ManagePYQs />} />
             <Route
               path="/admin/manage-discussions"
