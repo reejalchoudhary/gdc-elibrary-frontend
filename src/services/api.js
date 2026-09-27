@@ -202,3 +202,23 @@ export const resourceAPI = {
   rejectResource: (id) => api.patch(`/resources/${id}/reject`),
   deleteResource: (id) => api.delete(`/resources/${id}`),
 };
+
+export const issueAPI = {
+  createIssue: (data) =>
+    api.post("/issues", data),
+
+  getMyIssues: () =>
+    api.get("/issues/my"),
+
+  getAllIssues: () =>
+    api.get("/admin/issues"),
+
+  getIssue: (issueId) =>
+    api.get(`/admin/issues/${issueId}`),
+
+  updateIssueStatus: (issueId, data) =>
+    api.put(`/admin/issues/${issueId}/status`, data),
+
+  deleteIssue: (issueId) =>
+    api.delete(`/admin/issues/${issueId}`),
+};

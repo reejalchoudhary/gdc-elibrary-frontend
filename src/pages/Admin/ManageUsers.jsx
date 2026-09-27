@@ -115,6 +115,20 @@ export default function ManageUsers() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-600 via-pink-600 to-orange-500 p-8 text-white">
       <h1 className="text-4xl font-bold mb-8 text-center">👥 Manage Users</h1>
+      
+      <div className="max-w-7xl mx-auto mb-6">
+        <button
+          onClick={() => window.history.back()}
+          className="group flex items-center gap-2 text-white/90 hover:text-white transition"
+        >
+          <span className="w-10 h-10 rounded-xl bg-white/10 border border-white/20 flex items-center justify-center group-hover:bg-white/20">
+            ←
+          </span>
+          <span className="font-medium">
+            Back to Dashboard
+          </span>
+        </button>
+      </div>
 
       <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 mb-8 shadow-xl border border-white/20">
         <h2 className="text-2xl font-bold mb-4 text-pink-300">Pending Student Requests</h2>

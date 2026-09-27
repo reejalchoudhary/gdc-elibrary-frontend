@@ -30,6 +30,7 @@ import ManageDiscussions from "./pages/Admin/ManageDiscussions";
 import ManageUsers from "./pages/Admin/ManageUsers";
 import ManageResources from "./pages/Admin/ManageResources";
 import AdminAnalytics from "./pages/Admin/AdminAnalytics";
+import ManageIssues from "./pages/Admin/ManageIssues";
 import { authAPI, clearTokens } from "./services/api";
 import ManualResources from "./pages/ManualResources";
 import ViewResource from "./pages/ViewResource";
@@ -190,6 +191,10 @@ export default function App() {
             <Route
               path="/admin/analytics"
               element={<AdminAnalytics />}
+            />
+            <Route
+              path="/admin/manage-issues"
+              element={<ManageIssues />}
             />
             <Route path="/admin/manage-pyqs" element={<ManagePYQs />} />
             <Route

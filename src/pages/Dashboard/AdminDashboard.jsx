@@ -11,6 +11,7 @@ import {
   FaChartBar,
   FaSignOutAlt,
   FaUserShield,
+  FaExclamationCircle,
 } from "react-icons/fa";
 
 export default function AdminDashboard() {
@@ -256,6 +257,36 @@ export default function AdminDashboard() {
             className="mt-8 bg-cyan-600 hover:bg-cyan-700 text-white text-sm sm:text-base font-semibold py-2.5 sm:py-3 rounded-xl transition-all duration-200"
           >
             Go to Resources
+          </button>
+
+        </motion.div>
+
+                <motion.div
+          whileHover={{ y: -5 }}
+          transition={{ duration: 0.2 }}
+          className="bg-white/5 backdrop-blur-xl border border-amber-500/20 hover:border-amber-400 rounded-3xl p-5 sm:p-6 lg:p-8 shadow-xl flex flex-col justify-between"
+        >
+          <div>
+
+            <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-amber-500 flex items-center justify-center text-3xl text-white mb-6">
+              <FaExclamationCircle />
+            </div>
+
+            <h2 className="text-xl sm:text-2xl font-bold text-white mb-4">
+              Manage Issues
+            </h2>
+
+            <p className="text-slate-300 leading-6 sm:leading-7 text-sm sm:text-base">
+              Review student reported issues, technical problems, resource complaints and suggestions from one place.
+            </p>
+
+          </div>
+
+          <button
+            onClick={() => navigate("/admin/manage-issues")}
+            className="mt-8 bg-amber-500 hover:bg-amber-600 text-white text-sm sm:text-base font-semibold py-2.5 sm:py-3 rounded-xl transition-all duration-200"
+          >
+            Go to Issues
           </button>
 
         </motion.div>
